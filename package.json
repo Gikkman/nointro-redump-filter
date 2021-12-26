@@ -1,0 +1,40 @@
+{
+    "name": "nointro-redump-filter",
+    "version": "1.0.0",
+    "description": "",
+    "bin": "build/main.js",
+    "scripts": {
+        "prebuild": "npm run compile",
+        "build": "pkg . --compress=gzip",
+        "compile": "tsc",
+        "start": "ts-node src/main.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Gikkman/nointro-redump-filter.git"
+    },
+    "author": "Gikkman",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Gikkman/nointro-redump-filter/issues"
+    },
+    "homepage": "https://github.com/Gikkman/nointro-redump-filter#readme",
+    "dependencies": {
+        "properties-reader": "^2.2.0"
+    },
+    "devDependencies": {
+        "@types/node": "^16.9.4",
+        "@types/properties-reader": "^2.1.1",
+        "@types/sharp": "^0.29.2",
+        "copyfiles": "^2.4.1",
+        "pkg": "^5.4.1",
+        "ts-node": "^10.4.0",
+        "typescript": "^4.4.3"
+    },
+    "pkg": {
+        "outputPath": "release",
+        "targets": [
+            "node14-win-x64"
+        ]
+    }
+}
