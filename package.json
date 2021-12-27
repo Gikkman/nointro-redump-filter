@@ -7,7 +7,8 @@
         "prebuild": "npm run compile",
         "build": "pkg . --compress=gzip",
         "compile": "tsc",
-        "start": "ts-node src/main.ts"
+        "test": "jasmine-ts --files --config=jasmine.json",
+        "start": "ts-node --files src/main.ts"
     },
     "repository": {
         "type": "git",
@@ -23,10 +24,14 @@
         "properties-reader": "^2.2.0"
     },
     "devDependencies": {
-        "@types/node": "^16.9.4",
+        "@types/jasmine": "^3.10.2",
+        "@types/node": "^16.11.17",
         "@types/properties-reader": "^2.1.1",
         "@types/sharp": "^0.29.2",
         "copyfiles": "^2.4.1",
+        "jasmine": "^3.10.0",
+        "jasmine-spec-reporter": "^7.0.0",
+        "jasmine-ts": "^0.4.0",
         "pkg": "^5.4.1",
         "ts-node": "^10.4.0",
         "typescript": "^4.4.3"

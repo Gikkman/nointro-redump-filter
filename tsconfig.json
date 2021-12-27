@@ -1,13 +1,18 @@
 {
     "compilerOptions": {
         "strict": true,
-
+        
         "incremental": true,
 
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
+        "resolveJsonModule": true,
         "sourceMap": true,
-        "baseUrl": ".",
-        "outDir": "build"
-    }
+        "rootDir": "./src",
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "build",
+    },
+    "include": [
+        "./src/**/*"
+    ]
 }

@@ -1,0 +1,36 @@
+{
+    "input-directory": "roms",
+    "output-directory": "output",
+    "collections":[
+        {
+            "platform": "nes",
+            "output": "Ninntendo Entertainment System [NES]",
+            "input": [
+                "Nintendo - Famicom [Eng]",
+                "Nintendo - Famicom [T-En] Collection",
+                "Nintendo - Family Computer Disk System [T-En] Collection",
+                "Nintendo - NES - English Collection",
+                "Nintendo - Nintendo Entertainment System",
+                "Nintendo - Nintendo Entertainment System [Eng]"
+            ]
+        },
+        {
+            "platform": "snes",
+            "output": "Super Nintendo Entertainment System [SNES]",
+            "input": [
+                "Nintendo - Super Famicom [Eng]",
+                "Nintendo - Super Famicom [T-En] Collection",
+                "Nintendo - Super Nintendo Entertainment System"
+            ]
+        },
+        {
+            "platform": "TurboGrafx 16",
+            "output": "TurboGrafx 16 [TG16]",
+            "input": [
+                "NEC - PC Engine - TurboGrafx 16",
+                "NEC - PC Engine [T-En] Collection",
+                "NEC - PC Engine CD & TurboGrafx CD"
+            ]
+        }
+    ]
+}
