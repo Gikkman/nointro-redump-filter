@@ -3,8 +3,8 @@
     "output-directory": "output",
     "collections":[
         {
-            "platform": "nes",
-            "output": "Ninntendo Entertainment System [NES]",
+            "platform": "Nes",
+            "output": "Ninntendo Entertainment System [nes]",
             "input": [
                 "Nintendo - Famicom [Eng]",
                 "Nintendo - Famicom [T-En] Collection",
@@ -15,8 +15,8 @@
             ]
         },
         {
-            "platform": "snes",
-            "output": "Super Nintendo Entertainment System [SNES]",
+            "platform": "Snes",
+            "output": "Super Nintendo Entertainment System [snes]",
             "input": [
                 "Nintendo - Super Famicom [Eng]",
                 "Nintendo - Super Famicom [T-En] Collection",
@@ -24,12 +24,107 @@
             ]
         },
         {
+            "platform": "Game Boy",
+            "output": "Nintendo Game Boy [gb]",
+            "input": [
+                "Nintendo - Game Boy",
+                "Nintendo - Game Boy [T-En] Collection",
+                "Nintendo - Game Boy Color",
+                "Nintendo - Game Boy Color [T-En] Collection"
+            ]
+        },
+        {
+            "platform": "Game Boy Advance",
+            "output": "Nintendo Game Boy Advance [gba]",
+            "input": [
+                "Nintendo - Game Boy Advance",
+                "Nintendo - Game Boy Advance [T-En] Collection"
+            ]
+        },
+        {
+            "platform": "SG-1000",
+            "output": "Sega SG-1000 [sg1]",
+            "input": [
+                "Sega - SG-1000 [T-En] Collection"
+            ]
+        },
+        {
+            "platform": "Game Gear",
+            "output": "Sega Game Gear [gg]",
+            "input": [
+                "Sega - Game Gear",
+                "Sega - Game Gear [T-En] Collection"
+            ]
+        },
+        {
+            "platform": "Master System",
+            "output": "Sega Master System [sms]",
+            "input": [
+                "Sega - Master System",
+                "Sega - Master System [T-En] Collection"
+            ]
+        },
+        {
+            "platform": "Sega Mega Drive",
+            "output": "Sega Mega Drive [gen]",
+            "input": [
+                "Sega - Mega Drive - Genesis",
+                "Sega - Mega Drive [T-En] Collection"
+            ]
+        },
+        {
+            "platform": "Sega Saturn",
+            "output": "Sega Saturn [sat]",
+            "input": [
+                "Sega - Saturn (Redump)",
+                "Sega - Saturn [T-En] Collection"
+            ]
+        },
+        {
+            "platform": "Neo Geo Pocket",
+            "output": "SNK Neo Geo Pocket [ngp]",
+            "input": [
+                "SNK - Neo Geo Pocket"
+            ]
+        },
+        {
+            "platform": "Neo Geo Pocket Color",
+            "output": "SNK Neo Geo Pocket Color [ngpc]",
+            "input": [
+                "SNK - Neo Geo Pocket Color"
+            ]
+        },
+        {
             "platform": "TurboGrafx 16",
-            "output": "TurboGrafx 16 [TG16]",
+            "output": "TurboGrafx 16 [tg16]",
             "input": [
                 "NEC - PC Engine - TurboGrafx 16",
-                "NEC - PC Engine [T-En] Collection",
+                "NEC - PC Engine [T-En] Collection"
+            ]
+        },
+        {
+            "platform": "TurboGrafx 16 CD",
+            "output": "TurboGrafx 16 [tg16cd]",
+            "input": [
                 "NEC - PC Engine CD & TurboGrafx CD"
+            ]
+        },
+        {
+            "platform": "Playstation",
+            "output": "Sony Playstation [ps1]",
+            "input": [
+                "Sony - PlayStation (America) (Games)",
+                "Sony - PlayStation (Asia) (Games)",
+                "Sony - PlayStation (Europe - Australia) (Games)"
+            ]
+        },
+        {
+            "platform": "Playstation 2",
+            "output": "Sony Playstation 2 [ps2]",
+            "input": [
+                "Sony - PlayStation 2 (America) (Games) (#-F)",
+                "Sony - PlayStation 2 (America) (Games) (G-O)",
+                "Sony - PlayStation 2 (America) (Games) (P-Z)"
             ]
         }
     ]
