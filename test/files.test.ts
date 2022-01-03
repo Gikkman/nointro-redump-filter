@@ -1,59 +1,20 @@
-import { substrBack, substrFront } from "../src/files";
+import path from "path"
+import { listFilesFlat } from "../src/files";
 
-describe("Test substrFront", function() {
-    it("can handle single match with single pattern", function() {
-        const input = "hello-world";
-        const output = substrFront(input, "-");
-        expect(output).toBe("hello");
+describe("Test listFilesFlag", function() {
+    it("can handle nested directories", function() {
+        const testInputPath = path.join(__dirname, "test-input");
+        const testInputFileList = listFilesFlat(testInputPath);
+        expect(testInputFileList.length).toBe(9)
     });
-    it("can handle multiple matches with single pattern", function() {
-        const input = "hello-world-com";
-        const output = substrFront(input, "-");
-        expect(output).toBe("hello");
+    it("can handle flat directories", function() {
+        const testInputPath = path.join(__dirname, "test-input", "inner-2");
+        const testInputFileList = listFilesFlat(testInputPath);
+        expect(testInputFileList.length).toBe(2)
     });
-    it("can handle multiple matches of multiple pattern", function() {
-        const input = "hello-wor.ld.co-m";
-        const output = substrFront(input, ".", "-");
-        expect(output).toBe("hello");
+    it("can give empty list on missing directory", function() {
+        const testInputPath = path.join(__dirname, "test-input", "inner-3");
+        const testInputFileList = listFilesFlat(testInputPath);
+        expect(testInputFileList.length).toBe(0)
     });
-    it("can handle no matches", function() {
-        const input = "hello-world.com";
-        const output = substrFront(input, "/", ",");
-        expect(output).toBe("hello-world.com");
-    });
-    it("can doesn't care about order", function() {
-        const input = "hello-world.com";
-        const output1 = substrFront(input, ".", "-");
-        const output2 = substrFront(input, ".", "-");
-        expect(output1).toBe(output2);
-    });
-});
-
-describe("Test substrBack", function() {
-    it("can handle single match with single pattern", function() {
-        const input = "hello-world.com";
-        const output = substrBack(input, "-");
-        expect(output).toBe("hello");
-    });
-    it("can handle multiple matches with single pattern", function() {
-        const input = "hello-world-com";
-        const output = substrBack(input, "-");
-        expect(output).toBe("hello-world");
-    });
-    it("can handle multiple matches of multiple pattern", function() {
-        const input = "hello-wor.ld.co-m";
-        const output = substrBack(input, ".", "-");
-        expect(output).toBe("hello-wor.ld.co");
-    });
-    it("can handle no matches", function() {
-        const input = "hello-world.com";
-        const output = substrBack(input, "/", ",");
-        expect(output).toBe("hello-world.com");
-    });
-    it("can doesn't care about order", function() {
-        const input = "hello-world.com";
-        const output1 = substrBack(input, ".", "-");
-        const output2 = substrBack(input, ".", "-");
-        expect(output1).toBe(output2);
-    });
-});
+})

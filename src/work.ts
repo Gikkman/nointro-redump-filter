@@ -1,15 +1,8 @@
 import fs, { writeFile } from "fs";
 import path from "path";
-import { mkdirIfNotExists, substrBack, substrFront } from "./files";
+import { listFilesFlat, mkdirIfNotExists } from "./files";
+import { substrBack, substrFront } from "./util";
 
-type GameFile = {
-    dir: string,
-    file: string,
-}
-type GameGroup = {
-    title: string,
-    files: GameFile[],
-}
 
 export function setup(inputBaseDirectory: string, outputBaseDirectory: string, collection: Collection) {
     const outputAbsoultePath = path.join(outputBaseDirectory, collection.output);
@@ -23,16 +16,8 @@ export function setup(inputBaseDirectory: string, outputBaseDirectory: string, c
 }
 
 export function run(data: ReturnType<typeof setup>) {
-    const files: GameFile[] = [];
     console.log("Scanning input directories for platform", data.platform);
-    for(const input of data.inputAbsolutePaths) {
-        const dirents = fs.readdirSync(input, {withFileTypes: true});
-        for(const dirent of dirents) {
-            if(dirent.isFile() && !dirent.name.startsWith(".") ) {
-                files.push( {dir: input, file: dirent.name} )
-            }
-        }
-    }
+    const files: GameFile[] = listFilesFlat(...data.inputAbsolutePaths);
     console.log("Scanning done. Files found:", files.length);
 
     const gameGroups = groupGames(files);

@@ -9,3 +9,12 @@ type Collections = {
     "output-directory": string,
     "collections": Collection[],
 }
+
+type GameFile = {
+    dir: string,
+    file: string,
+}
+type GameGroup = {
+    title: string,
+    files: GameFile[],
+}
