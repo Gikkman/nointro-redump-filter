@@ -1,4 +1,4 @@
-import { substrBack, substrFront } from "../src/util";
+import { SetToJSON, substrBack, substrFront } from "../src/util";
 
 describe("Test substrFront", function() {
     it("can handle single match with single pattern", function() {
@@ -57,3 +57,20 @@ describe("Test substrBack", function() {
         expect(output1).toBe(output2);
     });
 });
+
+describe("Test SetToJSON", () => {
+    it("can handle just a set", () => {
+        const arr = ["hello", "world"];
+        const stringified = JSON.stringify(arr);
+        const set = new Set(arr);
+        const json = JSON.stringify(set, SetToJSON);
+        expect(json).toBe(stringified);
+    })
+    it("can handle nested set", () => {
+        const arr = ["hello", "world"];
+        const stringified = JSON.stringify({set: arr, other:2});
+        const set = new Set(arr);
+        const json = JSON.stringify({set: set, other:2}, SetToJSON);
+        expect(json).toBe(stringified);
+    })
+})

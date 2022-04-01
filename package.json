@@ -7,8 +7,8 @@
         "prebuild": "npm run compile",
         "build": "pkg . --compress=gzip",
         "compile": "tsc",
-        "test": "jasmine-ts --files --config=jasmine.json",
-        "start": "ts-node --files src/main.ts"
+        "test": "jasmine-ts --files --transpile-only --config=jasmine.json",
+        "start": "ts-node --files  --transpile-only src/main.ts"
     },
     "repository": {
         "type": "git",

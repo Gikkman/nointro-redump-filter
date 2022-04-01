@@ -6,28 +6,37 @@
             "request": "launch",
             "name": "Run",
             "runtimeExecutable": "node",
-            "runtimeArgs": ["--nolazy", "-r", "ts-node/register/transpile-only"],
-    
-            "args": ["src/main.ts"],
-            
+            "runtimeArgs": [
+                "--nolazy",
+                "-r",
+                "ts-node/register/transpile-only"
+            ],
+            "args": [
+                "src/main.ts"
+            ],
             "cwd": "${workspaceRoot}",
             "internalConsoleOptions": "openOnSessionStart",
-            "skipFiles": ["<node_internals>/**", "node_modules/**"]
+            "outputCapture": "std",
+            "skipFiles": [
+                "<node_internals>/**",
+                "node_modules/**"
+            ]
         },
         {
             "type": "node",
             "request": "launch",
-            "name": "Jasmine-ts Tests",
+            "name": "Test",
             "program": "${workspaceFolder}/node_modules/jasmine-ts/lib/index.js",
             "args": [
                 "--files",
+                "--transpile-only=true",
                 "--config=jasmine.json",
             ],
             "stopOnEntry": false,
             "cwd": "${workspaceRoot}",
             "protocol": "inspector",
-            "outputCapture":"std",
+            "outputCapture": "std",
             "internalConsoleOptions": "openOnSessionStart"
-      }
+        },
     ]
 }

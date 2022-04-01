@@ -4,15 +4,17 @@
         
         "incremental": true,
 
+        "moduleResolution": "node",
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
         "sourceMap": true,
-        "rootDir": "./src",
+        "rootDir": ".",
         "forceConsistentCasingInFileNames": true,
         "outDir": "build",
     },
     "include": [
-        "./src/**/*"
-    ]
+        "src/**/*", 
+        "test/*.test.ts"    
+    ],
 }

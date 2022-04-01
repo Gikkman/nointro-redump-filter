@@ -36,3 +36,10 @@ export function substrFront(input: string, ...patterns: string[]) {
     }
     return input.substring(0, lowest);
 }
+
+export function SetToJSON(key: any, value: any[]) {
+    if (typeof value === 'object' && value instanceof Set) {
+      return Array.from(value);
+    }
+    return value;
+  }
