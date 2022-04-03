@@ -3,6 +3,7 @@
         "strict": true,
         
         "incremental": true,
+        "downlevelIteration": true,
 
         "moduleResolution": "node",
         "esModuleInterop": true,

@@ -7,14 +7,17 @@ declare const DryRun: boolean;
 
 type Collection = {
     platform: string,
+    inputDirectoryOverride?: string
     output: string,
     input: string[],
 }
 
 type Collections = {
-    "input-directory": string,
-    "output-directory": string,
-    "collections": Collection[],
+    skipTags?: string[],
+    skipTitles?: string[]
+    inputDirectory: string,
+    outputDirectory: string,
+    collections: Collection[],
 }
 
 type GameFile = {
@@ -30,20 +33,6 @@ type RegionInfo = {
     languages: Set<string>,
     isTranslated: boolean,
 }
-type DiscFile = {
-    file: string,
-    dir: string,
-    discNumber: string,
-    discTags: Set<string>,
-}
-type DiscInfo = MultiDisc | NotMultiDisc;
-type MultiDisc = {
-    isMultiDisc: true,
-    discs: DiscFile[]
-}
-type NotMultiDisc = {
-    isMultiDisc: false,
-}
 type GameInfo = GameFile & GameTags & RegionInfo;
 
 type TitleGroup = {
@@ -51,7 +40,23 @@ type TitleGroup = {
     files: GameInfo[],
 };
 
-type GameGroup = {
+
+type GameGroupSingleFile = {
     title: string,
-    games: (GameInfo & DiscInfo)[];
-};
+    isMultiFile: false,
+    games: GameInfo[]
+}
+type GameGroupMultiFile = {
+    title: string,
+    isMultiFile: true,
+    games: GameInfoMultiFile[]
+}
+type GameGroup = GameGroupSingleFile | GameGroupMultiFile;
+
+type GameInfoMultiFile = {
+    commonTags: Set<string>
+    files: (GameInfo & MultiFileGameInfo)[]
+}
+type MultiFileGameInfo = {
+    index: string,
+}

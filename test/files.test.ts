@@ -191,6 +191,17 @@ describe("Test extractRegionInfo", () => {
         expect(region.languages).toContain("En");
         expect(region.isTranslated).toBeTrue();
     });
+    it("can handle (1M, 2M) version tags", () => {
+        const files = toGameFile(
+            "Sakura Taisen (Japan) (Disc 1) (7M, 9M).7z"
+        )
+        const file = files[0];
+        expect(file.regions.size).toBe(1); 
+        expect(file.regions).toContain("Japan");
+        expect(file.languages.size).toBe(1);
+        expect(file.languages).toContain("Ja");
+        expect(file.isTranslated).toBeFalse();
+    });
 })
 
 describe("Test groupGamesByTitle", () => {
@@ -239,16 +250,16 @@ describe("Test extractDiscInfo", () => {
         expect(output.length).toBe(2);
         
         const group1 = output[0];
-        expect(group1.title).toBe("Final Fantasy Tactiscs");
+        expect(group1.title).toBe("Final Fantasy Tactics");
+        expect(group1.isMultiFile).toBeFalse();
         expect(group1.games.length).toBe(1);
-        const gameFft = group1.games[1];
-        expect(gameFft.isMultiDisc).toBeFalse();
+        expect((group1.games[0] as GameInfo).file).toBe("Final Fantasy Tactics (USA).zip")
         
-        const group2 = output[0];
+        const group2 = output[1];
         expect(group2.title).toBe("Final Fantasy VII");
+        expect(group2.isMultiFile).toBeTrue();
         expect(group2.games.length).toBe(1);
-        const gameFf7 = group1.games[1];
-        expect(gameFf7.isMultiDisc).toBeTrue();
+        expect((group2.games[0] as GameInfoMultiFile).files[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip")
     })
     it("can handle multiple discs with no disc tags", () => {
         const output = groupByTitle(
@@ -261,18 +272,19 @@ describe("Test extractDiscInfo", () => {
         expect(group.title).toBe("Final Fantasy VII");
         expect(group.games.length).toBe(1);
         
-        const game = group.games[0] as (GameInfo & DiscInfo);
-        if(game.isMultiDisc) {
-            expect(game.discs.length).toBe(2);
-            expect(game.discs[0].discNumber).toBe("1");
-            expect(game.discs[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip");
-            expect(game.discs[0].discTags.size).toBe(0);
-            expect(game.discs[1].discNumber).toBe("2");
-            expect(game.discs[1].file).toBe("Final Fantasy VII (USA) (Disc 2).zip");
-            expect(game.discs[1].discTags.size).toBe(0);
-        } else {
-            fail("Game was not multi-disc")
+        if(group.isMultiFile) {
+            const game = group.games[0];
+            expect(game.files.length).toBe(2);
+            expect(game.commonTags.size).toBe(0)
+            expect(game.files[0].index).toBe("1");
+            expect(game.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip");
+            expect(game.files[1].index).toBe("2");
+            expect(game.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2).zip");
         }
+        else {
+            fail("Game was not multi-file")
+        }
+
     })
     it("can handle one game with mutliple discs and with different disc tags", () => {
         const output = groupByTitle(
@@ -285,34 +297,60 @@ describe("Test extractDiscInfo", () => {
         
         const group = output[0];
         expect(group.title).toBe("Final Fantasy VII");
+        expect(group.isMultiFile).toBeTrue()
         expect(group.games.length).toBe(2);
         
-        const gameRevA = group.games[0];
-        if(gameRevA.isMultiDisc) {
-            expect(gameRevA.discs.length).toBe(2);
-            expect(gameRevA.discs[0].discNumber).toBe("1");
-            expect(gameRevA.discs[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev A).zip");
-            expect(gameRevA.discs[0].discTags.size).toBe(1);
-            expect(gameRevA.discs[0].discTags.has("Rev A")).toBeTrue();
-            expect(gameRevA.discs[1].discNumber).toBe("2");
-            expect(gameRevA.discs[1].file).toBe("Final Fantasy VII (USA) (Disc 2) (Rev A).zip");
-            expect(gameRevA.discs[1].discTags.size).toBe(1);
-            expect(gameRevA.discs[1].discTags.has("Rev A")).toBeTrue();
-        } else
-            fail("Game was not multi-disc")
-
-        const gameRevB = group.games[1];
-        if(gameRevB.isMultiDisc) {
-            expect(gameRevB.discs.length).toBe(2);
-            expect(gameRevB.discs[0].discNumber).toBe("1");
-            expect(gameRevB.discs[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip");
-            expect(gameRevB.discs[0].discTags.size).toBe(1);
-            expect(gameRevB.discs[0].discTags.has("Rev B")).toBeTrue();
-            expect(gameRevB.discs[1].discNumber).toBe("2");
-            expect(gameRevB.discs[1].file).toBe("Final Fantasy VII (USA) (Disc 2).zip");
-            expect(gameRevB.discs[1].discTags.size).toBe(1);
-            expect(gameRevB.discs[1].discTags.has("Rev B")).toBeTrue();
-        } else
-            fail("Game was not multi-disc")
+        if(group.isMultiFile) {
+            const gameRevA = group.games[0];
+            expect(gameRevA.files.length).toBe(2);
+            expect(gameRevA.commonTags.size).toBe(1)
+            expect(gameRevA.commonTags.has("Rev A")).toBeTrue()
+            expect(gameRevA.files[0].index).toBe("1");
+            expect(gameRevA.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev A).zip");
+            expect(gameRevA.files[1].index).toBe("2");
+            expect(gameRevA.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2) (Rev A).zip");
+            
+            const gameRevB = group.games[1];
+            expect(gameRevB.files.length).toBe(2);
+            expect(gameRevB.commonTags.size).toBe(1)
+            expect(gameRevB.commonTags.has("Rev B")).toBeTrue()
+            expect(gameRevB.files[0].index).toBe("1");
+            expect(gameRevB.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev B).zip");
+            expect(gameRevB.files[1].index).toBe("2");
+            expect(gameRevB.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2) (Rev B).zip");
+        } 
+        else {
+            fail("Group was not multi-file")
+        }
+    })
+    it("can handle 'Sentimental Graffiti' for Saturn", () => {
+        const output = groupByTitle(
+            "Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (1M).7z",
+            "Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (2M).7z",
+            "Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (4M).7z",
+            "Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (5M).7z",
+            "Sentimental Graffiti (Japan) (Disc 2) (Second Window) (1M, 2M).7z",
+            "Sentimental Graffiti (Japan) (Disc 2) (Second Window) (4M).7z",
+            "Sentimental Graffiti (Japan) (Disc 2) (Second Window) (5M).7z",
+        ).map(extractDiscInfo);
+        expect(output.length).toBe(1);
+        
+        const group = output[0];
+        expect(group.title).toBe("Sentimental Graffiti");
+        expect(group.isMultiFile).toBeTrue()
+        expect(group.games.length).toBe(1);
+        
+        if(group.isMultiFile) {
+            const gameRev1M = group.games[0];
+            expect(gameRev1M.files.length).toBe(2);
+            expect(gameRev1M.commonTags.size).toBe(0)
+            expect(gameRev1M.files[0].index).toBe("1");
+            expect(gameRev1M.files[0].file).toBe("Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (1M).7z");
+            expect(gameRev1M.files[1].index).toBe("2");
+            expect(gameRev1M.files[1].file).toBe("Sentimental Graffiti (Japan) (Disc 2) (Second Window) (1M, 2M).7z");
+        } 
+        else {
+            fail("Group was not multi-file")
+        }
     })
 })

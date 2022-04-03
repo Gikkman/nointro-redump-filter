@@ -1,10 +1,38 @@
 {
-    "input-directory": "roms",
-    "output-directory": "output",
+    "inputDirectory": "/mnt/u/Spel",
+    "outputDirectory": "output",
+    "skipTags": [
+        "demo",
+        "demo 1",
+        "demo 2",
+        "program"
+    ],
+    "skipTitles": [
+        "[bios]",
+        "action replay",
+        "game genie",
+        "game boy advance video",
+        "2 disney games",
+        "2 game pack",
+        "2 games in 1",
+        "2 games in one",
+        "2 in 1",
+        "2-in-1",
+        "3 game pack",
+        "3 games in 1",
+        "3 games in one",
+        "3 in 1",
+        "3-in-1",
+        "4 game pack",
+        "4 games in 1",
+        "4 games in one",
+        "4 in 1",
+        "4-in-1"
+    ],
     "collections":[
         {
             "platform": "Nes",
-            "output": "Ninntendo Entertainment System [nes]",
+            "output": "Nintendo Entertainment System [nes]",
             "input": [
                 "Nintendo - Famicom [Eng]",
                 "Nintendo - Famicom [T-En] Collection",
@@ -111,6 +139,7 @@
         },
         {
             "platform": "Playstation",
+            "inputDirectoryOverride": "/mnt/d/Games",
             "output": "Sony Playstation [ps1]",
             "input": [
                 "Sony - PlayStation (America) (Games)",
@@ -120,6 +149,7 @@
         },
         {
             "platform": "Playstation 2",
+            "inputDirectoryOverride": "/mnt/d/Games",
             "output": "Sony Playstation 2 [ps2]",
             "input": [
                 "Sony - PlayStation 2 (America) (Games) (#-F)",
