@@ -1,0 +1,16 @@
+{
+    "keys": [
+        "languages",
+        "regions"
+    ],
+    "languages": [
+        "en",
+        "ja"
+    ],
+    "regions": [
+        "world",
+        "usa",
+        "japan",
+        "europe"
+    ]
+}

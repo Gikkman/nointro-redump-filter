@@ -1,7 +1,7 @@
 import path from "path"
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat } from "../src/files";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements } from "../src/files";
 
-function toGameFile(...str: string[]): GameInfo[] {
+function toGameFile(...str: string[]): FileInfo[] {
     const g = str.map(g => ({file:g, dir: ""}))
                  .map(g => ({...extractTags(g),...g}))
                  .map(g => ({...extractRegionInfo(g), ...g}));
@@ -234,7 +234,7 @@ describe("Test groupGamesByTitle", () => {
         expect(groups.find(v => v.title === 'Final Fantasy Tactics')?.files.length).toBe(1)
     })
     it("can handle empty arrays", () => {
-        const files: GameInfo[] = []
+        const files: FileInfo[] = []
         const output = groupGamesByTitle(files);
         expect(output.length).toBe(0);
     })
@@ -242,89 +242,146 @@ describe("Test groupGamesByTitle", () => {
 
 describe("Test extractDiscInfo", () => {
     it("can handle single-disc games", () => {
-        const output = groupByTitle(
+        const games = groupByTitle(
             "Final Fantasy Tactics (USA).zip",
             "Final Fantasy VII (USA) (Disc 1).zip",
             "Final Fantasy VII (USA) (Disc 2).zip",
         ).map(extractDiscInfo);
-        expect(output.length).toBe(2);
+        expect(games.length).toBe(2);
+
+        const game1 = games[0];
+        expect(game1.title).toBe("Final Fantasy Tactics");
+        expect(game1.versions.length).toBe(1);
+        expect((game1.versions[0] as GameSingleFile).isMultiFile).toBeFalse()
+        expect((game1.versions[0] as GameSingleFile).file).toBe("Final Fantasy Tactics (USA).zip")
         
-        const group1 = output[0];
-        expect(group1.title).toBe("Final Fantasy Tactics");
-        expect(group1.isMultiFile).toBeFalse();
-        expect(group1.games.length).toBe(1);
-        expect((group1.games[0] as GameInfo).file).toBe("Final Fantasy Tactics (USA).zip")
-        
-        const group2 = output[1];
-        expect(group2.title).toBe("Final Fantasy VII");
-        expect(group2.isMultiFile).toBeTrue();
-        expect(group2.games.length).toBe(1);
-        expect((group2.games[0] as GameInfoMultiFile).files[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip")
+        const game2 = games[1];
+        expect(game2.title).toBe("Final Fantasy VII");
+        expect(game2.versions.length).toBe(1);
+        expect((game2.versions[0] as GameMultiFile).isMultiFile).toBeTrue()
+        expect((game2.versions[0] as GameMultiFile).files[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip")
+        expect((game2.versions[0] as GameMultiFile).files[1].file).toBe("Final Fantasy VII (USA) (Disc 2).zip")
     })
     it("can handle multiple discs with no disc tags", () => {
-        const output = groupByTitle(
+        const games = groupByTitle(
             "Final Fantasy VII (USA) (Disc 1).zip",
             "Final Fantasy VII (USA) (Disc 2).zip",
         ).map(extractDiscInfo);
-        expect(output.length).toBe(1);
+        expect(games.length).toBe(1);
         
-        const group = output[0];
-        expect(group.title).toBe("Final Fantasy VII");
-        expect(group.games.length).toBe(1);
+        const game = games[0];
+        expect(game.title).toBe("Final Fantasy VII");
+        expect(game.versions.length).toBe(1);
         
-        if(group.isMultiFile) {
-            const game = group.games[0];
-            expect(game.files.length).toBe(2);
-            expect(game.commonTags.size).toBe(0)
-            expect(game.files[0].index).toBe("1");
-            expect(game.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip");
-            expect(game.files[1].index).toBe("2");
-            expect(game.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2).zip");
+        const version = game.versions[0];
+        if(version.isMultiFile) {
+            expect(version.files.length).toBe(2);
+            expect(version.commonTags.size).toBe(1);
+            expect(version.commonTags.has("USA")).toBeTrue();
+            expect(version.files[0].index).toBe("1");
+            expect(version.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip");
+            expect(version.files[1].index).toBe("2");
+            expect(version.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2).zip");
         }
         else {
-            fail("Game was not multi-file")
+            fail("Version was not multi-file")
         }
-
     })
     it("can handle one game with mutliple discs and with different disc tags", () => {
-        const output = groupByTitle(
+        const games = groupByTitle(
             "Final Fantasy VII (USA) (Disc 1) (Rev A).zip",
             "Final Fantasy VII (USA) (Disc 2) (Rev A).zip",
             "Final Fantasy VII (USA) (Disc 1) (Rev B).zip",
             "Final Fantasy VII (USA) (Disc 2) (Rev B).zip",
         ).map(extractDiscInfo);
-        expect(output.length).toBe(1);
+        expect(games.length).toBe(1);
         
-        const group = output[0];
-        expect(group.title).toBe("Final Fantasy VII");
-        expect(group.isMultiFile).toBeTrue()
-        expect(group.games.length).toBe(2);
+        const game = games[0];
+        expect(game.title).toBe("Final Fantasy VII");
+        expect(game.versions.length).toBe(2);
         
-        if(group.isMultiFile) {
-            const gameRevA = group.games[0];
-            expect(gameRevA.files.length).toBe(2);
-            expect(gameRevA.commonTags.size).toBe(1)
-            expect(gameRevA.commonTags.has("Rev A")).toBeTrue()
-            expect(gameRevA.files[0].index).toBe("1");
-            expect(gameRevA.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev A).zip");
-            expect(gameRevA.files[1].index).toBe("2");
-            expect(gameRevA.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2) (Rev A).zip");
+        const versionA = game.versions[0]
+        const versionB = game.versions[1]
+        if(versionA.isMultiFile && versionB.isMultiFile) {
+            expect(versionA.files.length).toBe(2);
+            expect(versionA.commonTags.size).toBe(2)
+            expect(versionA.commonTags.has("Rev A")).toBeTrue();
+            expect(versionA.commonTags.has("USA")).toBeTrue();
+            expect(versionA.files[0].index).toBe("1");
+            expect(versionA.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev A).zip");
+            expect(versionA.files[1].index).toBe("2");
+            expect(versionA.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2) (Rev A).zip");
             
-            const gameRevB = group.games[1];
-            expect(gameRevB.files.length).toBe(2);
-            expect(gameRevB.commonTags.size).toBe(1)
-            expect(gameRevB.commonTags.has("Rev B")).toBeTrue()
-            expect(gameRevB.files[0].index).toBe("1");
-            expect(gameRevB.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev B).zip");
-            expect(gameRevB.files[1].index).toBe("2");
-            expect(gameRevB.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2) (Rev B).zip");
+            expect(versionB.files.length).toBe(2);
+            expect(versionB.commonTags.size).toBe(2)
+            expect(versionB.commonTags.has("Rev B")).toBeTrue()
+            expect(versionB.commonTags.has("USA")).toBeTrue()
+            expect(versionB.files[0].index).toBe("1");
+            expect(versionB.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev B).zip");
+            expect(versionB.files[1].index).toBe("2");
+            expect(versionB.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2) (Rev B).zip");
         } 
         else {
-            fail("Group was not multi-file")
+            fail("A game was not multi-file")
+        }
+    })
+    it("can handle 'Minakata Hakudou Toujou' for Saturn", () => {
+        const games = groupByTitle(
+            "Minakata Hakudou Toujou (Japan) (Disc 1) (2M).7z",
+            "Minakata Hakudou Toujou (Japan) (Disc 2).zip",
+        ).map(extractDiscInfo);
+        expect(games.length).toBe(1);
+        
+        const game = games[0];
+        expect(game.title).toBe("Minakata Hakudou Toujou");
+        expect(game.versions.length).toBe(1);
+        
+        const version = game.versions[0];
+        if(version.isMultiFile) {
+            expect(version.files.length).toBe(2);
+            expect(version.commonTags.size).toBe(1);
+            expect(version.commonTags.has("Japan")).toBeTrue();
+            expect(version.files[0].index).toBe("1");
+            expect(version.files[0].file).toBe("Minakata Hakudou Toujou (Japan) (Disc 1) (2M).zip");
+            expect(version.files[1].index).toBe("2");
+            expect(version.files[1].file).toBe("Minakata Hakudou Toujou (Japan) (Disc 2).zip");
+        }
+        else {
+            fail("Version was not multi-file")
+        }
+    })
+    it("can handle 'Nanatsu no Hikan' for Saturn", () => {
+        const games = groupByTitle(
+            "Nanatsu no Hikan (Japan) (Disc 1) (1M).7z",
+            "Nanatsu no Hikan (Japan) (Disc 1) (2M).7z",
+            "Nanatsu no Hikan (Japan) (Disc 2) (2M).7z",
+            "Nanatsu no Hikan (Japan) (Disc 3) (1M, 2M).7z",
+        ).map(extractDiscInfo);
+        expect(games.length).toBe(1);
+        
+        const game = games[0];
+        expect(game.title).toBe("Nanatsu no Hikan");
+        expect(game.versions.length).toBe(1);
+        
+        const version = game.versions[0]
+        if(version.isMultiFile) {
+            expect(version.files.length).toBe(2);
+            expect(version.commonTags.size).toBe(2);
+            expect(version.commonTags.has("Japan")).toBeTrue();
+            expect(version.commonTags.has("2M")).toBeTrue();
+            expect(version.files[0].index).toBe("1");
+            expect(version.files[0].file).toBe("Nanatsu no Hikan (Japan) (Disc 1) (2M).7z");
+            expect(version.files[1].index).toBe("2");
+            expect(version.files[1].file).toBe("Nanatsu no Hikan (Japan) (Disc 2) (2M).7z");
+            expect(version.files[1].index).toBe("3");
+            expect(version.files[1].file).toBe("Nanatsu no Hikan (Japan) (Disc 3) (1M, 2M).7z");
+        } 
+        else {
+            fail("Version was not multi-file")
         }
     })
     it("can handle 'Sentimental Graffiti' for Saturn", () => {
-        const output = groupByTitle(
+        const games = groupByTitle(
             "Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (1M).7z",
             "Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (2M).7z",
             "Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (4M).7z",
@@ -333,24 +390,115 @@ describe("Test extractDiscInfo", () => {
             "Sentimental Graffiti (Japan) (Disc 2) (Second Window) (4M).7z",
             "Sentimental Graffiti (Japan) (Disc 2) (Second Window) (5M).7z",
         ).map(extractDiscInfo);
-        expect(output.length).toBe(1);
+        expect(games.length).toBe(1);
         
-        const group = output[0];
-        expect(group.title).toBe("Sentimental Graffiti");
-        expect(group.isMultiFile).toBeTrue()
-        expect(group.games.length).toBe(1);
+        const game = games[0];
+        expect(game.title).toBe("Sentimental Graffiti");
+        expect(game.versions.length).toBe(1);
         
-        if(group.isMultiFile) {
-            const gameRev1M = group.games[0];
-            expect(gameRev1M.files.length).toBe(2);
-            expect(gameRev1M.commonTags.size).toBe(0)
-            expect(gameRev1M.files[0].index).toBe("1");
-            expect(gameRev1M.files[0].file).toBe("Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (1M).7z");
-            expect(gameRev1M.files[1].index).toBe("2");
-            expect(gameRev1M.files[1].file).toBe("Sentimental Graffiti (Japan) (Disc 2) (Second Window) (1M, 2M).7z");
+        const version = game.versions[0]
+        if(version.isMultiFile) {
+            expect(version.files.length).toBe(2);
+            expect(version.commonTags.size).toBe(2);
+            expect(version.commonTags.has("Japan")).toBeTrue();
+            expect(version.commonTags.has("1M")).toBeTrue();
+            expect(version.files[0].index).toBe("1");
+            expect(version.files[0].file).toBe("Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (1M).7z");
+            expect(version.files[1].index).toBe("2");
+            expect(version.files[1].file).toBe("Sentimental Graffiti (Japan) (Disc 2) (Second Window) (1M, 2M).7z");
         } 
         else {
-            fail("Group was not multi-file")
+            fail("Version was not multi-file")
         }
+    })
+    it("can handle 'Ace Combat 3 - Electrosphere' for PS1", () => {
+        const games = groupByTitle(
+            "Ace Combat 3 - Electrosphere (USA).zip",
+            "Ace Combat 3 - Electrosphere (Europe).zip",
+            "Ace Combat 3 - Electrosphere (Japan) (Disc 1).zip",
+            "Ace Combat 3 - Electrosphere (Japan) (Disc 2).zip",
+        ).map(extractDiscInfo);
+        expect(games.length).toBe(1);
+        
+        const game = games[0];
+        expect(game.versions.length).toBe(3)
+
+        const usVersion = game.versions.find(g => g.regions.has("USA"))
+        expect(usVersion?.isMultiFile).toBeFalse()
+
+        const euVersion = game.versions.find(g => g.regions.has("Europe"))
+        expect(euVersion?.isMultiFile).toBeFalse();
+
+        const jpVersion = game.versions.find(g => g.regions.has("Japan"))
+        expect(jpVersion?.isMultiFile).toBeTrue()
+    })
+    it("can handle 'Street Fighter Collection' and its many regions", () => {
+        const games = groupByTitle(
+            "Street Fighter Collection (Europe) (Disc 1).7z",
+            "Street Fighter Collection (Europe) (Disc 2).7z",
+            "Street Fighter Collection (Japan) (Disc 1).7z",
+            "Street Fighter Collection (Japan) (Disc 2).7z",
+            "Street Fighter Collection (USA) (Disc 1).7z",
+            "Street Fighter Collection (USA) (Disc 2).7z",
+        ).map(extractDiscInfo);
+        expect(games.length).toBe(1);
+        
+        const game = games[0];
+        expect(game.versions.length).toBe(3);
+        expect(game.title).toBe("Street Fighter Collection")
+        for(const version of game.versions) {
+            if(version.isMultiFile) {
+                expect(version.regions).toEqual(version.commonTags)
+            } else {
+                fail(`Version ${version.file} was not multi-file`)
+            }
+        }
+    })
+})
+
+describe("Test skipTags", () => {
+    it("skips games with banned tags", () => {
+        const skips = new Set<string>(["demo", "r1"])
+        expect( clearsTagRequirements(skips, toGameFile("Virtua Fighter 2 (Japan) (Demo).7z")[0]) ).toBeFalse();
+        expect( clearsTagRequirements(skips, toGameFile("Code R (Japan) (R1).7z")[0]) ).toBeFalse();
+        expect( clearsTagRequirements(skips, toGameFile("16t (Japan) (SegaNet).zip")[0]) ).toBeTrue();
+    })
+
+    it("keeps games without banned tags", () => {
+        const skips = new Set<string>(["demo", "r1"])
+        const games = toGameFile(
+            "Virtua Fighter 2 (Japan) (Demo).7z",
+            "Code R (Japan) (R1).7z",
+            "Vatlva (Japan) (R2).7z",
+        )
+        const filtered = games.filter(g => clearsTagRequirements(skips, g))        
+        expect(filtered.length).toBe(1);
+        expect(filtered.map(g => g.file)).toContain("Vatlva (Japan) (R2).7z")
+    })
+})
+
+describe("Test skipTitlePrefix", () => {
+    it("skips games with banned prefix", () => {
+        const skips = new Set<string>(["virtua", "code"])
+        const games = groupByTitle(
+            "Virtua Fighter 2 (Japan) (Demo).7z",
+            "Code R (Japan) (R1).7z",
+            "Vatlva (Japan) (R2).7z",
+        ).map(extractDiscInfo)
+        expect( clearsTitlePrefixRequirements(skips, games[0]) ).toBeFalse();
+        expect( clearsTitlePrefixRequirements(skips, games[1]) ).toBeFalse();
+        expect( clearsTitlePrefixRequirements(skips, games[2]) ).toBeTrue();
+    })
+
+    it("keeps games without banned prefix", () => {
+        const skips = new Set<string>(["vi", "co"])
+        const games = groupByTitle(
+            "Virtua Fighter 2 (Japan) (Demo).7z",
+            "Code R (Japan) (R1).7z",
+            "Vatlva (Japan) (R2).7z",
+        ).map(extractDiscInfo)
+        const filtered = games.filter(g => clearsTitlePrefixRequirements(skips, g))        
+        expect(filtered.length).toBe(1);
+        expect(filtered.map(g => g.title)).toContain("Vatlva")
     })
 })

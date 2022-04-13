@@ -1,6 +1,6 @@
 import { writeFile } from "fs";
 import path from "path";
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, shouldSkipTag } from "./files";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements } from "./files";
 import { SetToJSON } from "./util";
 
 
@@ -11,7 +11,7 @@ export function setup(inputBaseDirectory: string, outputBaseDirectory: string, s
     mkdirIfNotExists(outputAbsoultePath);
     return {
         skipTagList: new Set<string>(skipTagList), 
-        skipTitlePrefixList,
+        skipTitlePrefixList: new Set<string>(skipTitlePrefixList),
         inputAbsolutePaths,
         outputAbsoultePath,
         platform: collection.platform,
@@ -23,19 +23,19 @@ export function run(data: ReturnType<typeof setup>) {
     const files: GameFile[] = listFilesFlat(...data.inputAbsolutePaths);
     console.log("Scanning done. Files found:", files.length);
 
-    const titleGroups = new Array<GameInfo>();
+    const titleGroups = new Array<FileInfo>();
     for(const file of files) {
         const tags = extractTags(file)
-        if( shouldSkipTag(data.skipTagList, tags) )
+        if( !clearsTagRequirements(data.skipTagList, tags) )
             continue;
         const regionInfo = extractRegionInfo(tags)
         titleGroups.push({...regionInfo, ...tags, ...file})
     }
 
     const gameGroups = groupGamesByTitle(titleGroups);
+    const discGroups = gameGroups.map(g => extractDiscInfo(g)).sort((a,b) => a.title.localeCompare(b.title))
+    const filteredDiscGroups = discGroups.filter(g => clearsTitlePrefixRequirements(data.skipTitlePrefixList, g));
 
-    const discGroups = gameGroups.map(g => extractDiscInfo(g)).sort( (a,b) => a.title.localeCompare(b.title))
-
-    console.log("Grouping games done. Unique game titles:", discGroups.length);
-    writeFile( path.join(data.outputAbsoultePath, "data.json"), JSON.stringify(discGroups, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
+    console.log("Grouping games done. Unique game titles:", filteredDiscGroups.length);
+    writeFile( path.join(data.outputAbsoultePath, "data.json"), JSON.stringify(filteredDiscGroups, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
 }

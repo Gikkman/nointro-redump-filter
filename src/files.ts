@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { off, title } from "process";
 import { substrBack } from "./util";
 
 export function verifyExists(path: fs.PathLike) {
@@ -62,7 +61,7 @@ export function listFilesFlat(...dirPaths: string[]): GameFile[] {
  */
  enum SplitState { outside, inside, building }
  const ValidRegions = new Set(["Japan", "USA", "Europe", "World", "Asia", "Scandinavia", "Latin America", "Australia", "Austria", "Belgium", "Brazil", "Canada", "China", "Denmark", "Finland", "France", "Germany", "Greece", "Hong Kong", "Italy", "Israel", "Ireland", "Korea", "Netherlands", "Norway", "Poland", "Portugal", "Russia", "Spain", "Sweden", "Taiwan", "UK", "Unknown", ]);
-export function extractTags(gameFile: GameFile): GameTags {
+export function extractTags(gameFile: GameFile): Tags {
     const {file} = gameFile;
     const tags = new Set<string>();
     
@@ -134,23 +133,32 @@ export function extractTags(gameFile: GameFile): GameTags {
     return {tags, tagsStartsAt};
 }
 
-export function shouldSkipTag(skipList: Set<string>, tags: GameTags) {
+export function clearsTagRequirements(skipList: Set<string>, tags: Tags) {
     for(const tag of tags.tags) {
         if( skipList.has(tag.toLowerCase()) ) {
-            return true;
+            return false;
         }
     }
-    return false;
+    return true;
 }
 
-export function extractRegionInfo(tags: GameTags): RegionInfo {
+export function clearsTitlePrefixRequirements(skipList: Set<string>, game: Game) {
+    const gameTitleLowerCase = game.title.toLowerCase();
+    for(const prefix of skipList) {
+        if( gameTitleLowerCase.startsWith(prefix) )
+            return false;
+    }
+    return true;
+}
+
+export function extractRegionInfo(tags: Tags): RegionInfo {
     const isTranslated = isTranslatedFunc(tags);
     const regions = selectTags(tags, ValidRegions);
     const languages = extractLanguageTags(tags, regions);
     return {isTranslated, regions, languages};
 }
 
-function isTranslatedFunc(tags: GameTags): boolean {
+function isTranslatedFunc(tags: Tags): boolean {
     const translationRegex = /T-([\w]{2})|Translated ([\w]{2})/gm;
     for(const tag of Array.from(tags.tags)) {
         const match = tag.match(translationRegex);
@@ -160,7 +168,7 @@ function isTranslatedFunc(tags: GameTags): boolean {
     return false;
 }
 
-function selectTags(tags: GameTags, alternatives: Set<string>): Set<string> {
+function selectTags(tags: Tags, alternatives: Set<string>): Set<string> {
     const matches= new Set<string>();
     for(const tag of tags.tags) {
         if(alternatives.has(tag))
@@ -169,7 +177,7 @@ function selectTags(tags: GameTags, alternatives: Set<string>): Set<string> {
     return matches;
 }
 
-function extractLanguageTags(tags: GameTags, reg: Set<string>): Set<string> {
+function extractLanguageTags(tags: Tags, reg: Set<string>): Set<string> {
     const languages = new Set<string>();
     const translationRegex = /T-([\w]{2})|Translated ([\w]{2})/;
     for(const tag of tags.tags) {
@@ -234,7 +242,7 @@ function extractLanguageTags(tags: GameTags, reg: Set<string>): Set<string> {
     return languages;
 }
 
-export function groupGamesByTitle(files: GameInfo[]): TitleGroup[] {
+export function groupGamesByTitle(files: FileInfo[]): TitleGroup[] {
     const games = new Map<string, TitleGroup>();
     for(const f of files) {
         // fwt = Filename Without Type-extension
@@ -247,50 +255,72 @@ export function groupGamesByTitle(files: GameInfo[]): TitleGroup[] {
     return Array.from( games.values() );
 }
 
-export function extractDiscInfo(group: TitleGroup): GameGroup {
-    let isMultiFile = false;
+export function extractDiscInfo(group: TitleGroup): Game {
+    let foundMultiFileGame = false;
     for(const file of group.files) {
         for(const tag of file.tags) {
             if(tag.indexOf("Disc") != -1) {
-                isMultiFile = true;
+                foundMultiFileGame = true;
             }
         }
     }
 
     // If it is not a multi-disc game, we just add "isMultiFile: false" to all
     // games, and return them
-    if(!isMultiFile) {
+    if(!foundMultiFileGame) {
         return {
             title: group.title,
-            isMultiFile: false,
-            games: group.files
+            versions: group.files.map(g => ({isMultiFile: false, ...g}))
         }
     }
 
     return messedUpMultiFileResolutionLogic(group);
 }
 
-function messedUpMultiFileResolutionLogic(group: TitleGroup): GameGroupMultiFile {
-    const DELIMITER = "::"
-    // Group files by tags that trails the 'Disc X' tag
-    const tagMap = new Map<string, (GameInfo&MultiFileGameInfo)[]>()
-    const indexMap = new Map<string,  (GameInfo&MultiFileGameInfo&{tagString:string})[]>()
+function messedUpMultiFileResolutionLogic(group: TitleGroup): Game {
+    // First, we separate all these files by region
+    const regionMap = new Map<string, FileInfo[]>();
     for(const file of group.files) {
-        const tagsAfterDisc: string[] = new Array();
-        let foundDiscTag = false;
+        for(const region of file.regions) {
+            const arr = regionMap.get(region) ?? [];
+            arr.push(file);
+            regionMap.set(region, arr);
+        }
+    }
+
+    const versions = new Array<GameSingleFile | GameMultiFile>()
+    for(const entry of regionMap.entries()) {
+        const region = entry[0];
+        const files = entry[1];
+        const regionVersions = messedUpMultiFileResolutionLogicForSingleRegion(region, files);
+        versions.push(...regionVersions);
+    }
+
+    return {
+        title: group.title,
+        versions
+    }
+}
+
+function messedUpMultiFileResolutionLogicForSingleRegion(region: string, files: FileInfo[]): (GameSingleFile | GameMultiFile)[] {
+    const DELIMITER = "::"
+    // Group files by tags except the 'Disc X' tag
+    const tagMap = new Map<string, (FileInfo&FileIndex)[]>()
+    const indexMap = new Map<string,  (FileInfo&FileIndex&{tagString:string})[]>()
+    for(const file of files) {
+        const tagsWithoutDisc: string[] = new Array();
         let index = "";
         for(const tag of file.tags) {
-            if( foundDiscTag ) {
-                tagsAfterDisc.push(tag);
-            }
-            else if(tag.indexOf("Disc") != -1) {
-                foundDiscTag = true;
+            if(index == "" && tag.indexOf("Disc") != -1) {
                 index = tag.substr("Disc".length).trim();
+            }
+            else {
+                tagsWithoutDisc.push(tag);
             }
         }
         const elem = {index, ...file};
 
-        const tagString = tagsAfterDisc.join(DELIMITER)
+        const tagString = tagsWithoutDisc.join(DELIMITER)
         const tagEntry = tagMap.get(tagString) ?? []
         tagEntry.push(elem)
         tagMap.set(tagString, tagEntry)
@@ -301,51 +331,51 @@ function messedUpMultiFileResolutionLogic(group: TitleGroup): GameGroupMultiFile
     }
     const numberOfDiscs = indexMap.size;
 
-    // If one or more tag groups contains a number of files equal to the number of unique indices we'se seen
-    // return those
-    const correctSizedTagGroups = new Map<string, (GameInfo&MultiFileGameInfo)[]>()
+    // If one or more tag groups contains a number of files equal to the number of discs, return those
+    const correctSizedTagGroups = new Map<string, (FileInfo&FileIndex)[]>()
     for(const tagGroup of tagMap.entries()) {
         if(tagGroup[1].length == numberOfDiscs) {
             correctSizedTagGroups.set(tagGroup[0], tagGroup[1])
         }
     }
     if( correctSizedTagGroups.size > 0 ) {
-        const games: GameInfoMultiFile[] = []
+        const games = new Array<GameSingleFile | GameMultiFile>()
         for(const tagGroup of correctSizedTagGroups.entries()) {
-            const commonTags = new Set(tagGroup[0].split(DELIMITER).filter(a => a.length > 0))
             const files = tagGroup[1]
-            const elem: GameInfoMultiFile = {
-                commonTags,
-                files,
+            if(files.length === 1) {
+                const e: GameSingleFile = {
+                    isMultiFile: false,
+                    ...files[0]
+                }
+                games.push(e);
             }
-            games.push(elem)
+            else {
+                // We take the region info from files[0], because all files will have the same region info
+                const {regions, languages, isTranslated, ..._rest} = files[0]; 
+                const commonTags = new Set(tagGroup[0].split(DELIMITER).filter(a => a.length > 0))
+                const e: GameMultiFile = {
+                    commonTags,
+                    isMultiFile: true,
+                    regions,
+                    languages,
+                    isTranslated,
+                    files
+                }
+           }
         }
-        return {
-            title: group.title,
-            isMultiFile: true,
-            games,
-        }
+        return games;
     }
 
-    // If no tag groups were correctly sized, then sort each index group by their tags, and pick the first
-    // one from each index
-    const sortedIndexMap = new Map([...indexMap].sort( (a,b) => a[0].localeCompare(b[0]) ))
-    for(const indexGroup of sortedIndexMap.entries()) {
-        indexGroup[1].sort( (a,b) => a.tagString.localeCompare(b.tagString))
-    }
-    const files = new Array<GameInfo & MultiFileGameInfo>()
-    const commonTags = new Set<string>()
-    for(const indexGroup of sortedIndexMap.values()) {
-        const {tagString, ...file} = indexGroup[0];
-        files.push( file )
-    } 
-    const games = [{
-        commonTags,
-        files
-    }]
-    return {
-        title: group.title,
-        isMultiFile: true,
-        games,
-    }
+    // If no tag groups were correctly sized, then we try to find the intersection of each index's tag maps,
+    // and see if 
+    const arr: (FileInfo&FileIndex)[][] = [];
+    indexMap.forEach(v => arr.push(v));
+    const indexes = arr.map(v => 0);
+    recurseDiscs_LongestTagSequence(arr, indexes);
+}
+
+function recurseDiscs_LongestTagSequence()
+
+function longestTagSequence(filesByIndex: Map<string,  (FileInfo&FileIndex&{tagString:string})[]>): Array<GameSingleFile | GameMultiFile> {
+    
 }

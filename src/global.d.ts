@@ -24,7 +24,7 @@ type GameFile = {
     dir: string,
     file: string,
 };
-type GameTags = {
+type Tags = {
     tagsStartsAt?: number,
     tags: Set<string>,
 }
@@ -33,30 +33,26 @@ type RegionInfo = {
     languages: Set<string>,
     isTranslated: boolean,
 }
-type GameInfo = GameFile & GameTags & RegionInfo;
+type FileInfo = GameFile & Tags & RegionInfo;
 
 type TitleGroup = {
     title: string,
-    files: GameInfo[],
+    files: FileInfo[],
 };
 
 
-type GameGroupSingleFile = {
+type Game = {
     title: string,
+    versions: (GameSingleFile | GameMultiFile)[],
+}
+type GameSingleFile = FileInfo & {
     isMultiFile: false,
-    games: GameInfo[]
 }
-type GameGroupMultiFile = {
-    title: string,
+type GameMultiFile = RegionInfo & {
     isMultiFile: true,
-    games: GameInfoMultiFile[]
+    commonTags: Set<string>,
+    files: (FileInfo & FileIndex)[]
 }
-type GameGroup = GameGroupSingleFile | GameGroupMultiFile;
-
-type GameInfoMultiFile = {
-    commonTags: Set<string>
-    files: (GameInfo & MultiFileGameInfo)[]
-}
-type MultiFileGameInfo = {
-    index: string,
+type FileIndex = {
+    index: string
 }

@@ -12,7 +12,8 @@ verifyExists(inputBaseDirectory);
 mkdirIfNotExists(outputBaseDirectory)
 
 for (const collection of col.collections) {
-    console.log(">>> Processing rom collection:", collection);
+    console.log("Processing rom collection:", collection);
     const data = setup(inputBaseDirectory, outputBaseDirectory, skipTagList, skipTitlePrefixList, collection);
     run(data);
+    console.log("")
 }
