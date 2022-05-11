@@ -31,7 +31,7 @@ export function getLowestScore(map: Map<string, number>, keys: Set<string>): num
     if(map.size === 0) throw new Error("Map must contain one or more elements");
     let bestScore = INF;
     keys.forEach(e => {
-        const score = map.get(e) ?? map.size
+        const score = map.get(e) ?? INF
         bestScore = Math.min(bestScore, score)
     })
     return bestScore;

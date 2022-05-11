@@ -1,4 +1,3 @@
-import { time } from "console"
 import { filterCandidatesByProperty, getLowestScore } from "../src/sorting"
 
 type TestData = {title: string, languages: Set<string>, regions: Set<string>}
@@ -12,7 +11,7 @@ function mkData(...data: [string, string[], string[]][]): TestData[] {
     })
 }
 
-describe( "Test getBestScore", () => {
+describe( "Test getLowestScore", () => {
     it("can handle empty map", () => {
         const scoreMap: Map<string, number> = new Map();
         const keys: Set<string> = new Set(["a", "b", "c"]);
@@ -26,7 +25,7 @@ describe( "Test getBestScore", () => {
     it("can handle handle missing mappings", () => {
         const scoreMap: Map<string, number> = new Map([["a", 1], ["b", 2], ["c", 3]]);
         const keys: Set<string> = new Set(["x", "y", "z"]);
-        expect( getLowestScore(scoreMap, keys) ).toBe(scoreMap.size)
+        expect( getLowestScore(scoreMap, keys) ).toBe(Number.MAX_SAFE_INTEGER)
     })
     it("can handle existing mappings correct", () => {
         const scoreMap: Map<string, number> = new Map([["a", 1], ["b", 2], ["c", 3]]);
