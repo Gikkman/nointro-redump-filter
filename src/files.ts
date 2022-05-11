@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { substrBack } from "./util";
+import { recursiveIntersection, substrBack } from "./util";
 
 export function verifyExists(path: fs.PathLike) {
     if( !fs.existsSync(path) ) {
@@ -256,25 +256,47 @@ export function groupGamesByTitle(files: FileInfo[]): TitleGroup[] {
 }
 
 export function extractDiscInfo(group: TitleGroup): Game {
-    let foundMultiFileGame = false;
+    // First, we separate all these files by region
+    const regionMap = new Map<string, FileInfo[]>();
     for(const file of group.files) {
-        for(const tag of file.tags) {
-            if(tag.indexOf("Disc") != -1) {
-                foundMultiFileGame = true;
+        for(const region of file.regions) {
+            const arr = regionMap.get(region) ?? [];
+            arr.push(file);
+            regionMap.set(region, arr);
+        }
+    }
+
+    const versions = new Array<GameSingleFile | GameMultiFile>()
+    for(const entry of regionMap.entries()) {
+        // Different regions can be single and multi file, for the same game
+        // Don't ask...
+        const region = entry[0];
+        const files = entry[1];
+
+        let foundMultiFileGame = false;
+        for(const file of files) {
+            for(const tag of file.tags) {
+                if(tag.indexOf("Disc") != -1) {
+                    foundMultiFileGame = true;
+                }
             }
         }
-    }
 
-    // If it is not a multi-disc game, we just add "isMultiFile: false" to all
-    // games, and return them
-    if(!foundMultiFileGame) {
-        return {
-            title: group.title,
-            versions: group.files.map(g => ({isMultiFile: false, ...g}))
+        if(!foundMultiFileGame) {
+            const regionVersions: GameSingleFile[] = files.map(g => ({isMultiFile: false, ...g}));
+            versions.push(...regionVersions)
         }
+        else {
+            const regionVersions = messedUpMultiFileResolutionLogicForSingleRegion(region, files);
+            versions.push(...regionVersions);
+        }
+
     }
 
-    return messedUpMultiFileResolutionLogic(group);
+    return {
+        title: group.title,
+        versions
+    }
 }
 
 function messedUpMultiFileResolutionLogic(group: TitleGroup): Game {
@@ -361,6 +383,7 @@ function messedUpMultiFileResolutionLogicForSingleRegion(region: string, files: 
                     isTranslated,
                     files
                 }
+                games.push(e);
            }
         }
         return games;
@@ -368,14 +391,54 @@ function messedUpMultiFileResolutionLogicForSingleRegion(region: string, files: 
 
     // If no tag groups were correctly sized, then we try to find the intersection of each index's tag maps,
     // and see if 
-    const arr: (FileInfo&FileIndex)[][] = [];
-    indexMap.forEach(v => arr.push(v));
-    const indexes = arr.map(v => 0);
-    recurseDiscs_LongestTagSequence(arr, indexes);
+    const byIndex: (FileInfo&FileIndex)[][] = [];
+    indexMap.forEach(v => {
+        const mapped = v.map(elem => {
+            const {tagString, ...rest} = elem;
+            return rest;
+        })
+        byIndex.push(mapped);
+    });
+    const indexes = byIndex.map(v => 0);
+    return recurseDiscs_LongestTagSequence(byIndex, indexes, 0, 0, [] )
 }
 
-function recurseDiscs_LongestTagSequence()
+function recurseDiscs_LongestTagSequence(byIndex: (FileInfo&FileIndex)[][], indexes: number[], currIndex: number, bestLenght: number, bestIndexes: number[]): GameMultiFile[] {
+    // If we've reaced the last element in currIndex, we reset the currIndex count, upp currIndex by one
+    // and move on to the next element
+    if(indexes[currIndex] === byIndex[currIndex].length) {
+        indexes[currIndex] = 0;
+        currIndex++;
+        if(currIndex === indexes.length) {
+            const files: (FileInfo&FileIndex)[] = []
+            for(let i = 0; i < byIndex.length; i++)
+                files[i] = byIndex[i][bestIndexes[i]];
+            const commonTags = recursiveIntersection<string>(...files.map(f => f.tags))
+            return [{
+                isMultiFile: true,
+                commonTags,
+                regions: files[0].regions,
+                languages: files[0].languages,
+                isTranslated: files[0].isTranslated, // I just give up by now but if there are some that are translated and some that aren't, fuck it
+                files,
+            }]
+        }
+        indexes[currIndex]++;
+        return recurseDiscs_LongestTagSequence(byIndex, indexes, currIndex, bestLenght, bestIndexes);
+    }
 
-function longestTagSequence(filesByIndex: Map<string,  (FileInfo&FileIndex&{tagString:string})[]>): Array<GameSingleFile | GameMultiFile> {
-    
+    const commonTags = intersectAt(byIndex, indexes, currIndex)
+    if(commonTags.size > bestLenght) {
+        bestLenght = commonTags.size
+        bestIndexes = [...indexes] // copy
+    }
+    indexes[currIndex]++;
+    return recurseDiscs_LongestTagSequence(byIndex, indexes, currIndex, bestLenght, bestIndexes);
+}
+
+function intersectAt(byIndex: (FileInfo&FileIndex)[][], indexes: number[], currIndex: number): Set<string> {
+    const files: (FileInfo&FileIndex)[] = []
+    for(let i = 0; i < byIndex.length; i++)
+        files[i] = byIndex[i][indexes[i]];
+    return recursiveIntersection<string>(...files.map(f => f.tags))
 }

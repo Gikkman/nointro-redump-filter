@@ -1,4 +1,4 @@
-import { SetToJSON, substrBack, substrFront } from "../src/util";
+import { recursiveIntersection, SetToJSON, substrBack, substrFront } from "../src/util";
 
 describe("Test substrFront", function() {
     it("can handle single match with single pattern", function() {
@@ -72,5 +72,31 @@ describe("Test SetToJSON", () => {
         const set = new Set(arr);
         const json = JSON.stringify({set: set, other:2}, SetToJSON);
         expect(json).toBe(stringified);
+    })
+})
+
+describe("Test intersect", () => {
+    it("can intersect two arrays with overlap", () => {
+        const arr1 = new Set([1,2,3]);
+        const arr2 = new Set([2,3,4]);
+        const i = recursiveIntersection(arr1, arr2)
+        expect(i.size).toBe(2);
+        expect(i).toContain(2);
+        expect(i).toContain(3);
+    })
+    it("can intersect three arrays with overlap", () => {
+        const arr1 = new Set([1,2,3]);
+        const arr2 = new Set([2,3,4]);
+        const arr3 = new Set([3,4,5]);
+        const i = recursiveIntersection(arr1, arr2, arr3)
+        expect(i.size).toBe(1);
+        expect(i).toContain(3);
+    })
+    it("can intersect three arrays with no overlap", () => {
+        const arr1 = new Set([1,2,3]);
+        const arr2 = new Set([2,3,4]);
+        const arr3 = new Set([5,6,7]);
+        const i = recursiveIntersection(arr1, arr2, arr3)
+        expect(i.size).toBe(0);
     })
 })

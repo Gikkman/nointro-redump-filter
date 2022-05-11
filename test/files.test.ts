@@ -342,7 +342,7 @@ describe("Test extractDiscInfo", () => {
             expect(version.commonTags.size).toBe(1);
             expect(version.commonTags.has("Japan")).toBeTrue();
             expect(version.files[0].index).toBe("1");
-            expect(version.files[0].file).toBe("Minakata Hakudou Toujou (Japan) (Disc 1) (2M).zip");
+            expect(version.files[0].file).toBe("Minakata Hakudou Toujou (Japan) (Disc 1) (2M).7z");
             expect(version.files[1].index).toBe("2");
             expect(version.files[1].file).toBe("Minakata Hakudou Toujou (Japan) (Disc 2).zip");
         }
@@ -365,7 +365,7 @@ describe("Test extractDiscInfo", () => {
         
         const version = game.versions[0]
         if(version.isMultiFile) {
-            expect(version.files.length).toBe(2);
+            expect(version.files.length).toBe(3);
             expect(version.commonTags.size).toBe(2);
             expect(version.commonTags.has("Japan")).toBeTrue();
             expect(version.commonTags.has("2M")).toBeTrue();
@@ -373,8 +373,8 @@ describe("Test extractDiscInfo", () => {
             expect(version.files[0].file).toBe("Nanatsu no Hikan (Japan) (Disc 1) (2M).7z");
             expect(version.files[1].index).toBe("2");
             expect(version.files[1].file).toBe("Nanatsu no Hikan (Japan) (Disc 2) (2M).7z");
-            expect(version.files[1].index).toBe("3");
-            expect(version.files[1].file).toBe("Nanatsu no Hikan (Japan) (Disc 3) (1M, 2M).7z");
+            expect(version.files[2].index).toBe("3");
+            expect(version.files[2].file).toBe("Nanatsu no Hikan (Japan) (Disc 3) (1M, 2M).7z");
         } 
         else {
             fail("Version was not multi-file")

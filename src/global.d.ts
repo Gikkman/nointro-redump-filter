@@ -43,8 +43,9 @@ type TitleGroup = {
 
 type Game = {
     title: string,
-    versions: (GameSingleFile | GameMultiFile)[],
+    versions: GameVersion[],
 }
+type GameVersion = (GameSingleFile | GameMultiFile);
 type GameSingleFile = FileInfo & {
     isMultiFile: false,
 }

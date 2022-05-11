@@ -42,4 +42,18 @@ export function SetToJSON(key: any, value: any[]) {
       return Array.from(value);
     }
     return value;
-  }
+}
+
+export function recursiveIntersection<T>(...cols: Set<T>[]): Set<T> {
+    if(cols.length < 2 ) {
+        return new Set();
+    }
+    if(cols.length == 2) {
+        const arrA = [...cols[0]]
+        const arrB = [...cols[1]]
+        return new Set(arrA.filter(e => arrB.indexOf(e) !== -1))
+    }
+    const colsShort = cols.slice(0, cols.length-1);
+    const colsLast = cols[cols.length-1];
+    return recursiveIntersection( recursiveIntersection(...colsShort), colsLast )
+}

@@ -5,7 +5,10 @@
     ],
     "languages": [
         "en",
-        "ja"
+        "ja",
+        "sv",
+        "de",
+        "zh"
     ],
     "regions": [
         "world",
