@@ -1,6 +1,7 @@
 import { writeFile } from "fs";
 import path from "path";
 import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements } from "./files";
+import { findMostSuitableVersion } from "./sorting";
 import { SetToJSON } from "./util";
 
 
@@ -14,6 +15,7 @@ export function setup(inputBaseDirectory: string, outputBaseDirectory: string, s
         skipTitlePrefixList: new Set<string>(skipTitlePrefixList),
         inputAbsolutePaths,
         outputAbsoultePath,
+        unzip: collection.unzip ?? false,
         platform: collection.platform,
     }
 }
@@ -35,7 +37,8 @@ export function run(data: ReturnType<typeof setup>) {
     const gameGroups = groupGamesByTitle(titleGroups);
     const discGroups = gameGroups.map(g => extractDiscInfo(g)).sort((a,b) => a.title.localeCompare(b.title))
     const filteredDiscGroups = discGroups.filter(g => clearsTitlePrefixRequirements(data.skipTitlePrefixList, g));
+    const prioratisedGames = filteredDiscGroups.map(g => findMostSuitableVersion(g))
 
-    console.log("Grouping games done. Unique game titles:", filteredDiscGroups.length);
-    writeFile( path.join(data.outputAbsoultePath, "data.json"), JSON.stringify(filteredDiscGroups, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
+    console.log("Grouping games done. Unique game titles:", prioratisedGames.length);
+    writeFile( path.join(data.outputAbsoultePath, "data.json"), JSON.stringify(prioratisedGames, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
 }

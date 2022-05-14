@@ -10,6 +10,7 @@ type Collection = {
     inputDirectoryOverride?: string
     output: string,
     input: string[],
+    unzip?: boolean,
 }
 
 type Collections = {

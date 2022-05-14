@@ -202,6 +202,22 @@ describe("Test extractRegionInfo", () => {
         expect(file.languages).toContain("Ja");
         expect(file.isTranslated).toBeFalse();
     });
+    it("can handle one-character regions", () => {
+        const file = toGameFile("Advanced Dungeons & Dragons - Dragons of Flame (J) [T+Eng1.03_DvD_Trans].nes")[0];
+        expect(file.regions.size).toBe(1);
+        expect(file.regions).toContain("Japan");
+        expect(file.languages.size).toBe(1);
+        expect(file.languages).toContain("En")
+        expect(file.isTranslated).toBeTrue()
+    });
+    it("uses fallback language when none is known", () => {
+        const file = toGameFile("Airball (Unknown) (Proto 1).zip")[0];
+        expect(file.regions.size).toBe(1);
+        expect(file.regions).toContain("Unknown");
+        expect(file.languages.size).toBe(1);
+        expect(file.languages).toContain("??")
+        expect(file.isTranslated).toBeFalse()
+    })
 })
 
 describe("Test groupGamesByTitle", () => {

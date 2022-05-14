@@ -31,7 +31,7 @@ export function getLowestScore(map: Map<string, number>, keys: Set<string>): num
     if(map.size === 0) throw new Error("Map must contain one or more elements");
     let bestScore = INF;
     keys.forEach(e => {
-        const score = map.get(e) ?? INF
+        const score = map.get(e.toLowerCase()) ?? INF
         bestScore = Math.min(bestScore, score)
     })
     return bestScore;
@@ -54,10 +54,10 @@ export function filterCandidatesByProperty<T>(propertyScoreMap: Map<string, numb
     })
 }
 
-export function findMostSuitableVersion(game: Game): GameVersion {
-    if(game.versions.length === 1) return game.versions[0];
+export function findMostSuitableVersion(game: Game): Game & {bestVersion: GameVersion} {
+    if(game.versions.length === 1) return {...game, bestVersion: game.versions[0]};
 
     const candidatesAfterLanguages = filterCandidatesByProperty(LanguageScoreMap, game.versions, (v: GameVersion) => v.languages);
     const candidatesAfterRegion = filterCandidatesByProperty(RegionScoreMap, candidatesAfterLanguages, (v: GameVersion) => v.regions);
-    return candidatesAfterRegion[0];
+    return {title: game.title, bestVersion: candidatesAfterRegion[0], versions: game.versions}
 }

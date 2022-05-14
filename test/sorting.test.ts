@@ -1,4 +1,5 @@
-import { filterCandidatesByProperty, getLowestScore } from "../src/sorting"
+import { extractTags, extractRegionInfo, groupGamesByTitle, extractDiscInfo } from "../src/files";
+import { filterCandidatesByProperty, findMostSuitableVersion, getLowestScore } from "../src/sorting"
 
 type TestData = {title: string, languages: Set<string>, regions: Set<string>}
 function mkData(...data: [string, string[], string[]][]): TestData[] {
@@ -9,6 +10,14 @@ function mkData(...data: [string, string[], string[]][]): TestData[] {
             regions: new Set(e[2] ?? []),
         }
     })
+}
+
+function toGameWithVerions(...versions: string[]) {
+    const g = versions.map(g => ({file:g, dir: ""}))
+                 .map(g => ({...extractTags(g),...g}))
+                 .map(g => ({...extractRegionInfo(g), ...g}));
+    const group = groupGamesByTitle(g);
+    return extractDiscInfo(group[0]);
 }
 
 describe( "Test getLowestScore", () => {
@@ -81,5 +90,17 @@ describe("Test filterCandidatesByScore", () => {
         expect(filtered[0].title).toBe("Q")
         expect(filtered[1].title).toBe("Y")
         expect(filtered[2].title).toBe("Z")
+    })
+})
+
+describe("Test findMostSuitableVersion", () => {
+    it("can handle game with Ja and En langs", () => {
+        const game = toGameWithVerions(
+            "Ghostbusters (Japan) (Beta).zip",
+            "Ghostbusters (USA).zip"
+        )
+        const best = findMostSuitableVersion(game).bestVersion;
+        expect(best.languages).toContain("En")
+        expect(best.regions).toContain("USA")
     })
 })

@@ -60,8 +60,9 @@ export function listFilesFlat(...dirPaths: string[]): GameFile[] {
  * For more info, see: https://wiki.no-intro.org/index.php?title=Naming_Convention
  */
  enum SplitState { outside, inside, building }
- const ValidRegions = new Set(["Japan", "USA", "Europe", "World", "Asia", "Scandinavia", "Latin America", "Australia", "Austria", "Belgium", "Brazil", "Canada", "China", "Denmark", "Finland", "France", "Germany", "Greece", "Hong Kong", "Italy", "Israel", "Ireland", "Korea", "Netherlands", "Norway", "Poland", "Portugal", "Russia", "Spain", "Sweden", "Taiwan", "UK", "Unknown", ]);
-export function extractTags(gameFile: GameFile): Tags {
+ const ValidRegions = new Set(["J","U","E", "Japan", "USA", "Europe", "World", "Asia", "Scandinavia", "Latin America", "Australia", "Austria", "Belgium", "Brazil", "Canada", "China", "Denmark", "Finland", "France", "Germany", "Greece", "Hong Kong", "Italy", "Israel", "Ireland", "Korea", "Netherlands", "Norway", "Poland", "Portugal", "Russia", "Spain", "Sweden", "Taiwan", "UK", "Unknown", ]);
+ const RegionMappings = new Map([["J","Japan"], ["U","USA"], ["E","Europe"]])
+ export function extractTags(gameFile: GameFile): Tags {
     const {file} = gameFile;
     const tags = new Set<string>();
     
@@ -153,13 +154,13 @@ export function clearsTitlePrefixRequirements(skipList: Set<string>, game: Game)
 
 export function extractRegionInfo(tags: Tags): RegionInfo {
     const isTranslated = isTranslatedFunc(tags);
-    const regions = selectTags(tags, ValidRegions);
+    const regions = extractRegion(tags, ValidRegions, RegionMappings);
     const languages = extractLanguageTags(tags, regions);
     return {isTranslated, regions, languages};
 }
 
 function isTranslatedFunc(tags: Tags): boolean {
-    const translationRegex = /T-([\w]{2})|Translated ([\w]{2})/gm;
+    const translationRegex = /T[-+]([\w]{2})|Translated ([\w]{2})/gm;
     for(const tag of Array.from(tags.tags)) {
         const match = tag.match(translationRegex);
         if(match)
@@ -169,7 +170,7 @@ function isTranslatedFunc(tags: Tags): boolean {
 }
 
 function selectTags(tags: Tags, alternatives: Set<string>): Set<string> {
-    const matches= new Set<string>();
+    const matches = new Set<string>();
     for(const tag of tags.tags) {
         if(alternatives.has(tag))
             matches.add(tag);
@@ -177,9 +178,18 @@ function selectTags(tags: Tags, alternatives: Set<string>): Set<string> {
     return matches;
 }
 
+function extractRegion(tags: Tags, validRegions: Set<string>, regionMappings: Map<string, string>): Set<string> {
+    const potentialRegions = selectTags(tags, validRegions);
+    const regions = new Set<string>();
+    for(const r of potentialRegions) {
+        regions.add( regionMappings.get(r) ?? r )
+    }
+    return regions
+}
+
 function extractLanguageTags(tags: Tags, reg: Set<string>): Set<string> {
     const languages = new Set<string>();
-    const translationRegex = /T-([\w]{2})|Translated ([\w]{2})/;
+    const translationRegex = /T[-+]([\w]{2})|Translated ([\w]{2})/;
     for(const tag of tags.tags) {
         const match = tag.match(translationRegex);
         if(match) {
@@ -197,13 +207,13 @@ function extractLanguageTags(tags: Tags, reg: Set<string>): Set<string> {
             languages.add(tag);
     }
     
-    if(reg.has("USA") || reg.has("World") || reg.has("Australia") || reg.has("UK") || reg.has("Canada") || reg.has("Ireland"))
+    if(reg.has("USA") || reg.has("World") || reg.has("Australia") || reg.has("UK") || reg.has("Canada") || reg.has("Ireland") || reg.has("U"))
         languages.add("En");
     // Sometimes, the region "Europe" is set on a game, and it has language tags. In those cases, we've already picked up the 
     // language tags. But sometimes, it just says "Europe" and have to language tags. In that case, we assume it is in English
     else if( reg.has("Europe") && languages.size == 0) 
         languages.add("En");
-    else if(reg.has("Japan"))
+    else if(reg.has("Japan") || reg.has("J"))
         languages.add("Ja");
     else if(reg.has("Brazil") || reg.has("Portugal"))
         languages.add("Pt")
@@ -239,6 +249,8 @@ function extractLanguageTags(tags: Tags, reg: Set<string>): Set<string> {
         languages.add("Ru")
     else if(reg.has("Sweden"))
         languages.add("Sv")
+    else if(reg.has("Unknown") && languages.size == 0)
+        languages.add("??")
     return languages;
 }
 
@@ -291,31 +303,6 @@ export function extractDiscInfo(group: TitleGroup): Game {
             versions.push(...regionVersions);
         }
 
-    }
-
-    return {
-        title: group.title,
-        versions
-    }
-}
-
-function messedUpMultiFileResolutionLogic(group: TitleGroup): Game {
-    // First, we separate all these files by region
-    const regionMap = new Map<string, FileInfo[]>();
-    for(const file of group.files) {
-        for(const region of file.regions) {
-            const arr = regionMap.get(region) ?? [];
-            arr.push(file);
-            regionMap.set(region, arr);
-        }
-    }
-
-    const versions = new Array<GameSingleFile | GameMultiFile>()
-    for(const entry of regionMap.entries()) {
-        const region = entry[0];
-        const files = entry[1];
-        const regionVersions = messedUpMultiFileResolutionLogicForSingleRegion(region, files);
-        versions.push(...regionVersions);
     }
 
     return {

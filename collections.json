@@ -107,7 +107,8 @@
             "input": [
                 "Sega - Saturn (Redump)",
                 "Sega - Saturn [T-En] Collection"
-            ]
+            ],
+            "unzip": true
         },
         {
             "platform": "Neo Geo Pocket",
@@ -136,7 +137,8 @@
             "output": "TurboGrafx 16 [tg16cd]",
             "input": [
                 "NEC - PC Engine CD & TurboGrafx CD"
-            ]
+            ],
+            "unzip": true
         },
         {
             "platform": "Playstation",
@@ -146,7 +148,8 @@
                 "Sony - PlayStation (America) (Games)",
                 "Sony - PlayStation (Asia) (Games)",
                 "Sony - PlayStation (Europe - Australia) (Games)"
-            ]
+            ],
+            "unzip": true
         },
         {
             "platform": "Playstation 2",
@@ -156,7 +159,8 @@
                 "Sony - PlayStation 2 (America) (Games) (#-F)",
                 "Sony - PlayStation 2 (America) (Games) (G-O)",
                 "Sony - PlayStation 2 (America) (Games) (P-Z)"
-            ]
+            ],
+            "unzip": true
         }
     ]
 }
