@@ -16,19 +16,24 @@ function groupByTitle(...str: string[]): TitleGroup[] {
 describe("Test listFilesFlat", () => {
     it("can handle nested directories", () => {
         const testInputPath = path.join(__dirname, "test-input");
-        const testInputFileList = listFilesFlat(testInputPath);
+        const testInputFileList = listFilesFlat(new Set(), testInputPath);
         expect(testInputFileList.length).toBe(9)
     });
     it("can handle flat directories", () => {
         const testInputPath = path.join(__dirname, "test-input", "inner-2");
-        const testInputFileList = listFilesFlat(testInputPath);
+        const testInputFileList = listFilesFlat(new Set(),testInputPath);
         expect(testInputFileList.length).toBe(2)
     });
     it("can give empty list on missing directory", () => {
         const testInputPath = path.join(__dirname, "test-input", "inner-3");
-        const testInputFileList = listFilesFlat(testInputPath);
+        const testInputFileList = listFilesFlat(new Set(),testInputPath);
         expect(testInputFileList.length).toBe(0)
     });
+    it("skips file extensions as requested", () => {
+        const testInputPath = path.join(__dirname, "test-input", "inner-1");
+        const testInputFileList = listFilesFlat(new Set(["rar", "tar"]),testInputPath);
+        expect(testInputFileList.length).toBe(3)
+    })
 })
 
 describe("Test extractTags", () => {

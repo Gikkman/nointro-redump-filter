@@ -14,6 +14,7 @@ type Collection = {
 }
 
 type Collections = {
+    skipFileExtensions?: string[],
     skipTags?: string[],
     skipTitles?: string[]
     inputDirectory: string,
@@ -58,3 +59,5 @@ type GameMultiFile = RegionInfo & {
 type FileIndex = {
     index: string
 }
+
+type ProcessedGame = Game & {bestVersion: GameVersion}

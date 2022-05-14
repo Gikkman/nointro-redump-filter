@@ -1,6 +1,9 @@
 {
     "inputDirectory": "/mnt/u/Spel",
     "outputDirectory": "output",
+    "skipFileExtensions": [
+        "chd"
+    ],
     "skipTags": [
         "demo",
         "demo 1",

@@ -4,13 +4,22 @@ import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, lis
 import { findMostSuitableVersion } from "./sorting";
 import { SetToJSON } from "./util";
 
+export type ProcessResult = ReturnType<typeof setup> & {games: ProcessedGame[]}
 
-export function setup(inputBaseDirectory: string, outputBaseDirectory: string, skipTagList: string[], skipTitlePrefixList: string[], collection: Collection) {
+export function setup(
+        inputBaseDirectory: string, 
+        outputBaseDirectory: string, 
+        skipFileExtensions: string[], 
+        skipTagList: string[], 
+        skipTitlePrefixList: string[], 
+        collection: Collection
+        ) {
     const inputDirectory = collection.inputDirectoryOverride ?? inputBaseDirectory;
     const outputAbsoultePath = path.join(outputBaseDirectory, collection.output);
     const inputAbsolutePaths = collection.input.map(elem => path.join(inputDirectory, elem));
     mkdirIfNotExists(outputAbsoultePath);
     return {
+        skipFileExtensions: new Set<string>(skipFileExtensions),
         skipTagList: new Set<string>(skipTagList), 
         skipTitlePrefixList: new Set<string>(skipTitlePrefixList),
         inputAbsolutePaths,
@@ -20,9 +29,9 @@ export function setup(inputBaseDirectory: string, outputBaseDirectory: string, s
     }
 }
 
-export function run(data: ReturnType<typeof setup>) {
+export function run(data: ReturnType<typeof setup>) : ProcessResult{
     console.log("Scanning input directories for platform", data.platform);
-    const files: GameFile[] = listFilesFlat(...data.inputAbsolutePaths);
+    const files: GameFile[] = listFilesFlat(data.skipFileExtensions, ...data.inputAbsolutePaths);
     console.log("Scanning done. Files found:", files.length);
 
     const titleGroups = new Array<FileInfo>();
@@ -41,4 +50,6 @@ export function run(data: ReturnType<typeof setup>) {
 
     console.log("Grouping games done. Unique game titles:", prioratisedGames.length);
     writeFile( path.join(data.outputAbsoultePath, "data.json"), JSON.stringify(prioratisedGames, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
+
+    return {...data, games: prioratisedGames}
 }

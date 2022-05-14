@@ -28,7 +28,7 @@ export function mkdirIfNotExists(path: fs.PathLike): void {
     return;
 }
 
-export function listFilesFlat(...dirPaths: string[]): GameFile[] {
+export function listFilesFlat(skipFileExtensions: Set<string>, ...dirPaths: string[]): GameFile[] {
     const files: GameFile[] = [];
     for(const dirPath of dirPaths) {
         if(!fs.existsSync(dirPath)) continue;
@@ -38,11 +38,14 @@ export function listFilesFlat(...dirPaths: string[]): GameFile[] {
                 const name = dirent.name;
                 if(name.startsWith(".") || name.startsWith("_") || name.startsWith("[") || name.startsWith("~"))
                     continue;
+                const extension = name.slice( name.lastIndexOf(".") + 1);
+                if(skipFileExtensions.has(extension))
+                    continue;
                 files.push( {dir: dirPath, file: dirent.name} )
             }
             else if(dirent.isDirectory()) {
                 const childDirPath = path.join(dirPath, dirent.name);
-                const childFiles = listFilesFlat( childDirPath );
+                const childFiles = listFilesFlat(skipFileExtensions, childDirPath );
                 files.push(...childFiles);
             }
         }
