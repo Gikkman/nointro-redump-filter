@@ -270,6 +270,21 @@ export function groupGamesByTitle(files: FileInfo[]): TitleGroup[] {
     return Array.from( games.values() );
 }
 
+export function sortBadTagedFilesLast(group: TitleGroup, badTags: string[]): TitleGroup {
+    group.files.sort((left, right) => {
+        let leftHasBadTag = false;
+        let rightHasBadTag = false;
+        for(const tag of badTags) {
+            if(left.tags.has(tag)) leftHasBadTag = true;
+            if(right.tags.has(tag)) rightHasBadTag = true;
+        }
+        if(leftHasBadTag && !rightHasBadTag) return 1;
+        if(rightHasBadTag && !leftHasBadTag) return -1;
+        return 0;
+    })
+    return group;
+}
+
 export function extractDiscInfo(group: TitleGroup): Game {
     // First, we separate all these files by region
     const regionMap = new Map<string, FileInfo[]>();

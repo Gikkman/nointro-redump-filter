@@ -1,5 +1,5 @@
 import path from "path"
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements } from "../src/files";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements, sortBadTagedFilesLast } from "../src/files";
 
 function toGameFile(...str: string[]): FileInfo[] {
     const g = str.map(g => ({file:g, dir: ""}))
@@ -258,6 +258,47 @@ describe("Test groupGamesByTitle", () => {
         const files: FileInfo[] = []
         const output = groupGamesByTitle(files);
         expect(output.length).toBe(0);
+    })
+})
+
+describe("Test sortBadTagedFilesLast", () => {
+    it("does nothing if none has bad tag", () => {
+        const files = [
+            "Final Fantasy (USA).zip",
+            "Final Fantasy (USA) (Rev A).zip",
+            "Final Fantasy (USA) (Rev B).zip",
+        ]
+        const game = groupByTitle(...files)[0];
+        sortBadTagedFilesLast(game, ["Beta"])
+        expect(game.files[0].file).toBe("Final Fantasy (USA).zip")
+        expect(game.files[1].file).toBe("Final Fantasy (USA) (Rev A).zip")
+        expect(game.files[2].file).toBe("Final Fantasy (USA) (Rev B).zip")
+    })
+    it("sorts bad tags last", () => {
+        const files = [
+            "Final Fantasy (USA) (Beta).zip",
+            "Final Fantasy (USA) (Rev A).zip",
+            "Final Fantasy (USA) (Rev A) (Beta).zip",
+            "Final Fantasy (USA) (Rev B).zip",
+        ]
+        const game = groupByTitle(...files)[0];
+        sortBadTagedFilesLast(game, ["Beta"])
+        expect(game.files[0].file).toBe("Final Fantasy (USA) (Rev A).zip")
+        expect(game.files[1].file).toBe("Final Fantasy (USA) (Rev B).zip")
+        expect(game.files[2].file).toBe("Final Fantasy (USA) (Beta).zip")
+        expect(game.files[3].file).toBe("Final Fantasy (USA) (Rev A) (Beta).zip")
+    });
+    it("does nothing if everything has bad tags", () => {
+        const files = [
+            "Final Fantasy (USA).zip",
+            "Final Fantasy (USA) (Rev A).zip",
+            "Final Fantasy (USA) (Rev B).zip",
+        ]
+        const game = groupByTitle(...files)[0];
+        sortBadTagedFilesLast(game, ["USA"])
+        expect(game.files[0].file).toBe("Final Fantasy (USA).zip")
+        expect(game.files[1].file).toBe("Final Fantasy (USA) (Rev A).zip")
+        expect(game.files[2].file).toBe("Final Fantasy (USA) (Rev B).zip")
     })
 })
 

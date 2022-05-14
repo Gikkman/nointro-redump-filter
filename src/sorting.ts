@@ -11,7 +11,7 @@ const PrioConfig = {
         "usa",
         "japan",
         "europe"
-    ]
+    ],
 }
 
 const INF = Number.MAX_SAFE_INTEGER;

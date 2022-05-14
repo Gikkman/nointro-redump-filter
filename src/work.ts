@@ -1,6 +1,6 @@
 import { writeFile } from "fs";
 import path from "path";
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements } from "./files";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements, sortBadTagedFilesLast } from "./files";
 import { findMostSuitableVersion } from "./sorting";
 import { SetToJSON } from "./util";
 
@@ -44,6 +44,8 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
     }
 
     const gameGroups = groupGamesByTitle(titleGroups);
+    gameGroups.forEach(g => sortBadTagedFilesLast(g, ["Debug Version", "Debug Mode", "Beta"]));
+
     const discGroups = gameGroups.map(g => extractDiscInfo(g)).sort((a,b) => a.title.localeCompare(b.title))
     const filteredDiscGroups = discGroups.filter(g => clearsTitlePrefixRequirements(data.skipTitlePrefixList, g));
     const prioratisedGames = filteredDiscGroups.map(g => findMostSuitableVersion(g))
