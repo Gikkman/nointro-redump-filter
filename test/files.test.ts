@@ -1,5 +1,5 @@
 import path from "path"
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements, sortBadTagedFilesLast, extractTitle } from "../src/files";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements, extractTitle, titlefyString } from "../src/files";
 
 function toGameFile(...str: string[]): FileInfo[] {
     const g = str.map(g => ({file:g, dir: ""}))
@@ -239,6 +239,18 @@ describe("Test extractTitle", () => {
     });
 })
 
+describe("Test titlefyString", () => {
+    it("can remove spaces", () => {
+        expect( titlefyString("a a") ).toBe("aa")
+    });
+    it("can remove special characters", () => {
+        expect( titlefyString("a!-.~*?!;_<>|\"'=äa") ).toBe("aa")
+    });
+    it("can convert numerals", () => {
+        expect( titlefyString("a2 5a") ).toBe("aiiva")
+    });
+})
+
 describe("Test groupGamesByTitle", () => {
     it("can handle groupings", () => {
         const files = toGameFile(
@@ -248,10 +260,10 @@ describe("Test groupGamesByTitle", () => {
         );
         const groups = groupGamesByTitle(files);
         expect(groups.length).toBe(2);
-        expect(groups.map(f => f.title)).toContain("Final Fantasy VII")
-        expect(groups.map(f => f.title)).toContain("Final Fantasy Tactics")
-        expect(groups.find(v => v.title === 'Final Fantasy VII')?.files.length).toBe(2)
-        expect(groups.find(v => v.title === 'Final Fantasy Tactics')?.files.length).toBe(1)
+        expect(groups.map(f => f.title)).toContain("finalfantasyvii")
+        expect(groups.map(f => f.title)).toContain("finalfantasytactics")
+        expect(groups.find(v => v.title === 'finalfantasyvii')?.files.length).toBe(2)
+        expect(groups.find(v => v.title === 'finalfantasytactics')?.files.length).toBe(1)
     })
     it("can handle files that forms no groups", () => {
         const files = toGameFile(
@@ -261,12 +273,12 @@ describe("Test groupGamesByTitle", () => {
         );
         const groups = groupGamesByTitle(files);
         expect(groups.length).toBe(3);
-        expect(groups.map(f => f.title)).toContain("Final Fantasy VII")
-        expect(groups.map(f => f.title)).toContain("Final Fantasy VIII")
-        expect(groups.map(f => f.title)).toContain("Final Fantasy Tactics")
-        expect(groups.find(v => v.title === 'Final Fantasy VII')?.files.length).toBe(1)
-        expect(groups.find(v => v.title === 'Final Fantasy VIII')?.files.length).toBe(1)
-        expect(groups.find(v => v.title === 'Final Fantasy Tactics')?.files.length).toBe(1)
+        expect(groups.map(f => f.title)).toContain("finalfantasyvii")
+        expect(groups.map(f => f.title)).toContain("finalfantasyviii")
+        expect(groups.map(f => f.title)).toContain("finalfantasytactics")
+        expect(groups.find(v => v.title === 'finalfantasyvii')?.files.length).toBe(1)
+        expect(groups.find(v => v.title === 'finalfantasyviii')?.files.length).toBe(1)
+        expect(groups.find(v => v.title === 'finalfantasytactics')?.files.length).toBe(1)
     })
     it("can handle empty arrays", () => {
         const files: FileInfo[] = []
@@ -275,46 +287,6 @@ describe("Test groupGamesByTitle", () => {
     })
 })
 
-describe("Test sortBadTagedFilesLast", () => {
-    it("does nothing if none has bad tag", () => {
-        const files = [
-            "Final Fantasy (USA).zip",
-            "Final Fantasy (USA) (Rev A).zip",
-            "Final Fantasy (USA) (Rev B).zip",
-        ]
-        const game = groupByTitle(...files)[0];
-        sortBadTagedFilesLast(game, ["Beta"])
-        expect(game.files[0].file).toBe("Final Fantasy (USA).zip")
-        expect(game.files[1].file).toBe("Final Fantasy (USA) (Rev A).zip")
-        expect(game.files[2].file).toBe("Final Fantasy (USA) (Rev B).zip")
-    })
-    it("sorts bad tags last", () => {
-        const files = [
-            "Final Fantasy (USA) (Beta).zip",
-            "Final Fantasy (USA) (Rev A).zip",
-            "Final Fantasy (USA) (Rev A) (Beta).zip",
-            "Final Fantasy (USA) (Rev B).zip",
-        ]
-        const game = groupByTitle(...files)[0];
-        sortBadTagedFilesLast(game, ["Beta"])
-        expect(game.files[0].file).toBe("Final Fantasy (USA) (Rev A).zip")
-        expect(game.files[1].file).toBe("Final Fantasy (USA) (Rev B).zip")
-        expect(game.files[2].file).toBe("Final Fantasy (USA) (Beta).zip")
-        expect(game.files[3].file).toBe("Final Fantasy (USA) (Rev A) (Beta).zip")
-    });
-    it("does nothing if everything has bad tags", () => {
-        const files = [
-            "Final Fantasy (USA).zip",
-            "Final Fantasy (USA) (Rev A).zip",
-            "Final Fantasy (USA) (Rev B).zip",
-        ]
-        const game = groupByTitle(...files)[0];
-        sortBadTagedFilesLast(game, ["USA"])
-        expect(game.files[0].file).toBe("Final Fantasy (USA).zip")
-        expect(game.files[1].file).toBe("Final Fantasy (USA) (Rev A).zip")
-        expect(game.files[2].file).toBe("Final Fantasy (USA) (Rev B).zip")
-    })
-})
 
 describe("Test extractDiscInfo", () => {
     it("can handle single-disc games", () => {
@@ -326,13 +298,13 @@ describe("Test extractDiscInfo", () => {
         expect(games.length).toBe(2);
 
         const game1 = games[0];
-        expect(game1.title).toBe("Final Fantasy Tactics");
+        expect(game1.title).toBe("finalfantasytactics");
         expect(game1.versions.length).toBe(1);
         expect((game1.versions[0] as GameSingleFile).isMultiFile).toBeFalse()
         expect((game1.versions[0] as GameSingleFile).file).toBe("Final Fantasy Tactics (USA).zip")
         
         const game2 = games[1];
-        expect(game2.title).toBe("Final Fantasy VII");
+        expect(game2.title).toBe("finalfantasyvii");
         expect(game2.versions.length).toBe(1);
         expect((game2.versions[0] as GameMultiFile).isMultiFile).toBeTrue()
         expect((game2.versions[0] as GameMultiFile).files[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip")
@@ -346,7 +318,7 @@ describe("Test extractDiscInfo", () => {
         expect(games.length).toBe(1);
         
         const game = games[0];
-        expect(game.title).toBe("Final Fantasy VII");
+        expect(game.title).toBe("finalfantasyvii");
         expect(game.versions.length).toBe(1);
         
         const version = game.versions[0];
@@ -373,7 +345,7 @@ describe("Test extractDiscInfo", () => {
         expect(games.length).toBe(1);
         
         const game = games[0];
-        expect(game.title).toBe("Final Fantasy VII");
+        expect(game.title).toBe("finalfantasyvii");
         expect(game.versions.length).toBe(2);
         
         const versionA = game.versions[0]
@@ -409,7 +381,7 @@ describe("Test extractDiscInfo", () => {
         expect(games.length).toBe(1);
         
         const game = games[0];
-        expect(game.title).toBe("Minakata Hakudou Toujou");
+        expect(game.title).toBe("minakatahakudoutoujou");
         expect(game.versions.length).toBe(1);
         
         const version = game.versions[0];
@@ -436,7 +408,7 @@ describe("Test extractDiscInfo", () => {
         expect(games.length).toBe(1);
         
         const game = games[0];
-        expect(game.title).toBe("Nanatsu no Hikan");
+        expect(game.title).toBe("nanatsunohikan");
         expect(game.versions.length).toBe(1);
         
         const version = game.versions[0]
@@ -469,7 +441,7 @@ describe("Test extractDiscInfo", () => {
         expect(games.length).toBe(1);
         
         const game = games[0];
-        expect(game.title).toBe("Sentimental Graffiti");
+        expect(game.title).toBe("sentimentalgraffiti");
         expect(game.versions.length).toBe(1);
         
         const version = game.versions[0]
@@ -521,7 +493,7 @@ describe("Test extractDiscInfo", () => {
         
         const game = games[0];
         expect(game.versions.length).toBe(3);
-        expect(game.title).toBe("Street Fighter Collection")
+        expect(game.title).toBe("streetfightercollection")
         for(const version of game.versions) {
             if(version.isMultiFile) {
                 expect(version.regions).toEqual(version.tags)
@@ -575,6 +547,6 @@ describe("Test skipTitlePrefix", () => {
         ).map(extractDiscInfo)
         const filtered = games.filter(g => clearsTitlePrefixRequirements(skips, g))        
         expect(filtered.length).toBe(1);
-        expect(filtered.map(g => g.title)).toContain("Vatlva")
+        expect(filtered.map(g => g.title)).toContain("vatlva")
     })
 })

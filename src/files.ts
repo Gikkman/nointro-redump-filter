@@ -265,9 +265,7 @@ export function extractTitle(file: GameFile, tags: Tags) {
 export function groupGamesByTitle(files: FileInfo[]): TitleGroup[] {
     const games = new Map<string, TitleGroup>();
     for(const f of files) {
-        // fwt = Filename Without Type-extension
-        const fwt = substrBack(f.file, ".");
-        const gameName = fwt.substring(0, f.tagsStartsAt).trim();
+        const gameName = titlefyString(f.gameTitle)
         const gameGroup = games.get(gameName) ?? {title: gameName, files: []};
         gameGroup.files.push(f);
         games.set(gameName, gameGroup);
@@ -275,19 +273,41 @@ export function groupGamesByTitle(files: FileInfo[]): TitleGroup[] {
     return Array.from( games.values() );
 }
 
-export function sortBadTagedFilesLast(group: TitleGroup, badTags: string[]): TitleGroup {
-    group.files.sort((left, right) => {
-        let leftHasBadTag = false;
-        let rightHasBadTag = false;
-        for(const tag of badTags) {
-            if(left.tags.has(tag)) leftHasBadTag = true;
-            if(right.tags.has(tag)) rightHasBadTag = true;
-        }
-        if(leftHasBadTag && !rightHasBadTag) return 1;
-        if(rightHasBadTag && !leftHasBadTag) return -1;
-        return 0;
-    })
-    return group;
+export function titlefyString(s: string) {
+    const numberRegex = /[0-9]/g
+    const characterRegex = /[^a-zA-Z]/g    
+    return s.replace(numberRegex, numberToRoman).replace(characterRegex,"").toLowerCase();
+}
+
+function numberToRoman(s: string) {
+    switch(s) {
+        case '1': return 'i';
+        case '2': return 'ii';
+        case '3': return 'iii';
+        case '4': return 'iv';
+        case '5': return 'v';
+        case '6': return 'vi';
+        case '7': return 'vii';
+        case '8': return 'viii';
+        case '9': return 'ix';
+        case '10': return 'x';
+        case '11': return 'xi';
+        case '12': return 'xii';
+        case '13': return 'xiii';
+        case '14': return 'xiv';
+        case '15': return 'xv';
+        case '16': return 'xvi';
+        case '17': return 'xvii';
+        case '18': return 'xviii';
+        case '19': return 'xix';
+        case '20': return 'xx';
+        case '21': return 'xxi';
+        case '22': return 'xxii';
+        case '23': return 'xxiii';
+        case '24': return 'xxiv';
+        case '25': return 'xxv';
+        default: return s;
+    }
 }
 
 export function extractDiscInfo(group: TitleGroup): Game {
@@ -383,11 +403,12 @@ function messedUpMultiFileResolutionLogicForSingleRegion(region: string, files: 
             }
             else {
                 // We take the region info from files[0], because all files will have the same region info
-                const {regions, languages, isTranslated, ..._rest} = files[0]; 
+                const {regions, languages, isTranslated, gameTitle, ..._rest} = files[0]; 
                 const commonTags = new Set(tagGroup[0].split(DELIMITER).filter(a => a.length > 0))
                 const e: GameMultiFile = {
                     tags: commonTags,
                     isMultiFile: true,
+                    gameTitle,
                     regions,
                     languages,
                     isTranslated,
@@ -426,6 +447,7 @@ function recurseDiscs_LongestTagSequence(byIndex: (FileInfo&FileIndex)[][], inde
             const commonTags = recursiveIntersection<string>(...files.map(f => f.tags))
             return [{
                 isMultiFile: true,
+                gameTitle: files[0].gameTitle,
                 tags: commonTags,
                 regions: files[0].regions,
                 languages: files[0].languages,

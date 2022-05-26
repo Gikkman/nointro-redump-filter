@@ -1,5 +1,5 @@
 import { extractTags, extractRegionInfo, groupGamesByTitle, extractDiscInfo, extractTitle } from "../src/files";
-import { filterCandidatesByProperty, findMostSuitableVersion, getLowestScore } from "../src/sorting"
+import { filterCandidatesByProperty, findMostSuitableVersion, getLowestScore, filterAwayBadTagsIfPossible } from "../src/sorting"
 
 type TestData = {title: string, languages: Set<string>, regions: Set<string>}
 function mkData(...data: [string, string[], string[]][]): TestData[] {

@@ -2,7 +2,15 @@
     "inputDirectory": "/mnt/u/Spel",
     "outputDirectory": "output",
     "skipFileExtensions": [
-        "chd"
+        "chd",
+        "mp3",
+        "exe",
+        "txt",
+        "doc",
+        "docx",
+        "pdf",
+        "md",
+        "info"
     ],
     "skipTags": [
         "demo",
@@ -100,7 +108,8 @@
             "platform": "Master System",
             "output": "Sega Master System [sms]",
             "input": [
-                "Sega - Master System",
+                "Sega - Master System - Mark III",
+                "No-Intro/Sega - Master System - Mark III",
                 "Sega - Master System [T-En] Collection"
             ]
         },

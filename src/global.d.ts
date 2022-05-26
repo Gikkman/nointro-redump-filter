@@ -52,6 +52,7 @@ type GameSingleFile = FileInfo & {
     isMultiFile: false,
 }
 type GameMultiFile = RegionInfo & {
+    gameTitle: string,
     isMultiFile: true,
     tags: Set<string>,
     files: (FileInfo & FileIndex)[]
@@ -61,3 +62,9 @@ type FileIndex = {
 }
 
 type ProcessedGame = Game & {bestVersion: GameVersion}
+
+type GameWriteData = {
+    title: string,
+    languages: Set<string>,
+    fileAbsolutePaths: string[],
+};

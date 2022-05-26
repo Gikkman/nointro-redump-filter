@@ -28,7 +28,9 @@ const BadTags = new Set([
     "hack",
     "alpha",
     "beta",
-    "proto"
+    "debug version", 
+    "debug mode",
+    "proto",
 ])
 
 const INF = Number.MAX_SAFE_INTEGER;
@@ -71,7 +73,7 @@ export function filterCandidatesByProperty<T>(propertyScoreMap: Map<string, numb
     })
 }
 
-export function filterByBadTags<T>(badTags: Set<string>, versions: T[], tagAccessor: (v: T) => Set<string>): T[] {
+export function filterAwayBadTagsIfPossible<T>(badTags: Set<string>, versions: T[], tagAccessor: (v: T) => Set<string>): T[] {
     const filtered = versions.filter(v => {
         const tags = tagAccessor(v);
         for(const tag of tags) {
@@ -95,7 +97,7 @@ export function findMostSuitableVersion(game: Game): Game & {bestVersion: GameVe
     if(game.versions.length === 1) return {...game, bestVersion: game.versions[0]};
 
     const candidatesAfterLanguages = filterCandidatesByProperty(LanguageScoreMap, game.versions, (v: GameVersion) => v.languages);
-    const candidatesAfterBadTags = filterByBadTags(BadTags, candidatesAfterLanguages, (v: GameVersion) => v.tags)
+    const candidatesAfterBadTags = filterAwayBadTagsIfPossible(BadTags, candidatesAfterLanguages, (v: GameVersion) => v.tags)
     const candidatesAfterRegion = filterCandidatesByProperty(RegionScoreMap, candidatesAfterBadTags, (v: GameVersion) => v.regions);
     const candidatesAfterTranslations = filterAwayTranslations(candidatesAfterRegion);
     const candidatesAfterTagNumber = [...candidatesAfterTranslations].sort( (a,b)=> a.tags.size-b.tags.size );

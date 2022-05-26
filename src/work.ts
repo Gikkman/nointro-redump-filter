@@ -1,16 +1,10 @@
 import { writeFile } from "fs";
 import path, { join } from "path";
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements, sortBadTagedFilesLast, extractTitle } from "./files";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements, extractTitle } from "./files";
 import { findMostSuitableVersion } from "./sorting";
 import { SetToJSON } from "./util";
 
 export type ProcessResult = ReturnType<typeof setup> & {games: ProcessedGame[]}
-
-type GameWriteData = {
-    title: string,
-    languages: Set<string>,
-    fileAbsolutePaths: string[],
-};
 
 export function setup(
         inputBaseDirectory: string, 
@@ -36,10 +30,14 @@ export function setup(
 }
 
 export function run(data: ReturnType<typeof setup>) : ProcessResult{
+    ///////////////////////////////////////////////////////////////////////
+    // Find all files
     console.log("Scanning input directories for platform", data.platform);
     const files: GameFile[] = listFilesFlat(data.skipFileExtensions, ...data.inputAbsolutePaths);
     console.log("Scanning done. Files found:", files.length);
 
+    ///////////////////////////////////////////////////////////////////////
+    // Process files
     const titleGroups = new Array<FileInfo>();
     for(const file of files) {
         const tags = extractTags(file)
@@ -51,8 +49,6 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
     }
 
     const gameGroups = groupGamesByTitle(titleGroups);
-    gameGroups.forEach(g => sortBadTagedFilesLast(g, ["Debug Version", "Debug Mode", "Beta"]));
-
     const discGroups = gameGroups.map(g => extractDiscInfo(g)).sort((a,b) => a.title.localeCompare(b.title))
     const filteredDiscGroups = discGroups.filter(g => clearsTitlePrefixRequirements(data.skipTitlePrefixList, g));
     const prioratisedGames = filteredDiscGroups.map(g => findMostSuitableVersion(g))
@@ -75,7 +71,7 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
             fileAbsolutePaths.push( join(bestVersion.dir, bestVersion.file) );
         }
         best.push({
-            title: game.title,
+            title: bestVersion.gameTitle,
             languages: bestVersion.languages,
             fileAbsolutePaths
         })
