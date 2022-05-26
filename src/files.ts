@@ -257,6 +257,11 @@ function extractLanguageTags(tags: Tags, reg: Set<string>): Set<string> {
     return languages;
 }
 
+export function extractTitle(file: GameFile, tags: Tags) {
+    const end = tags.tagsStartsAt ?? file.file.lastIndexOf(".");
+    return file.file.substring(0, end).trim();
+}
+
 export function groupGamesByTitle(files: FileInfo[]): TitleGroup[] {
     const games = new Map<string, TitleGroup>();
     for(const f of files) {
@@ -381,7 +386,7 @@ function messedUpMultiFileResolutionLogicForSingleRegion(region: string, files: 
                 const {regions, languages, isTranslated, ..._rest} = files[0]; 
                 const commonTags = new Set(tagGroup[0].split(DELIMITER).filter(a => a.length > 0))
                 const e: GameMultiFile = {
-                    commonTags,
+                    tags: commonTags,
                     isMultiFile: true,
                     regions,
                     languages,
@@ -421,7 +426,7 @@ function recurseDiscs_LongestTagSequence(byIndex: (FileInfo&FileIndex)[][], inde
             const commonTags = recursiveIntersection<string>(...files.map(f => f.tags))
             return [{
                 isMultiFile: true,
-                commonTags,
+                tags: commonTags,
                 regions: files[0].regions,
                 languages: files[0].languages,
                 isTranslated: files[0].isTranslated, // I just give up by now but if there are some that are translated and some that aren't, fuck it

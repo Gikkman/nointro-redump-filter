@@ -35,7 +35,7 @@ type RegionInfo = {
     languages: Set<string>,
     isTranslated: boolean,
 }
-type FileInfo = GameFile & Tags & RegionInfo;
+type FileInfo = GameFile & Tags & RegionInfo & {gameTitle: string};
 
 type TitleGroup = {
     title: string,
@@ -53,7 +53,7 @@ type GameSingleFile = FileInfo & {
 }
 type GameMultiFile = RegionInfo & {
     isMultiFile: true,
-    commonTags: Set<string>,
+    tags: Set<string>,
     files: (FileInfo & FileIndex)[]
 }
 type FileIndex = {

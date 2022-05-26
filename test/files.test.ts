@@ -1,10 +1,11 @@
 import path from "path"
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements, sortBadTagedFilesLast } from "../src/files";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements, sortBadTagedFilesLast, extractTitle } from "../src/files";
 
 function toGameFile(...str: string[]): FileInfo[] {
     const g = str.map(g => ({file:g, dir: ""}))
                  .map(g => ({...extractTags(g),...g}))
-                 .map(g => ({...extractRegionInfo(g), ...g}));
+                 .map(g => ({...extractRegionInfo(g), ...g}))
+                 .map(g => ({ gameTitle: extractTitle(g, g), ...g}))
     return g;
 }
 
@@ -225,6 +226,19 @@ describe("Test extractRegionInfo", () => {
     })
 })
 
+describe("Test extractTitle", () => {
+    it("can handle tags", () => {
+        const file = toGameFile("Advanced Dungeons & Dragons - Dragons of Flame (J) [T+Eng1.03_DvD_Trans].nes")[0];
+        const title = extractTitle(file, file);
+        expect(title).toBe("Advanced Dungeons & Dragons - Dragons of Flame") 
+    });
+    it("can handle no tags", () => {
+        const file = toGameFile("Advanced Dungeons & Dragons - Dragons of Flame.nes")[0];
+        const title = extractTitle(file, file);
+        expect(title).toBe("Advanced Dungeons & Dragons - Dragons of Flame")
+    });
+})
+
 describe("Test groupGamesByTitle", () => {
     it("can handle groupings", () => {
         const files = toGameFile(
@@ -338,8 +352,8 @@ describe("Test extractDiscInfo", () => {
         const version = game.versions[0];
         if(version.isMultiFile) {
             expect(version.files.length).toBe(2);
-            expect(version.commonTags.size).toBe(1);
-            expect(version.commonTags.has("USA")).toBeTrue();
+            expect(version.tags.size).toBe(1);
+            expect(version.tags.has("USA")).toBeTrue();
             expect(version.files[0].index).toBe("1");
             expect(version.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1).zip");
             expect(version.files[1].index).toBe("2");
@@ -366,18 +380,18 @@ describe("Test extractDiscInfo", () => {
         const versionB = game.versions[1]
         if(versionA.isMultiFile && versionB.isMultiFile) {
             expect(versionA.files.length).toBe(2);
-            expect(versionA.commonTags.size).toBe(2)
-            expect(versionA.commonTags.has("Rev A")).toBeTrue();
-            expect(versionA.commonTags.has("USA")).toBeTrue();
+            expect(versionA.tags.size).toBe(2)
+            expect(versionA.tags.has("Rev A")).toBeTrue();
+            expect(versionA.tags.has("USA")).toBeTrue();
             expect(versionA.files[0].index).toBe("1");
             expect(versionA.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev A).zip");
             expect(versionA.files[1].index).toBe("2");
             expect(versionA.files[1].file).toBe("Final Fantasy VII (USA) (Disc 2) (Rev A).zip");
             
             expect(versionB.files.length).toBe(2);
-            expect(versionB.commonTags.size).toBe(2)
-            expect(versionB.commonTags.has("Rev B")).toBeTrue()
-            expect(versionB.commonTags.has("USA")).toBeTrue()
+            expect(versionB.tags.size).toBe(2)
+            expect(versionB.tags.has("Rev B")).toBeTrue()
+            expect(versionB.tags.has("USA")).toBeTrue()
             expect(versionB.files[0].index).toBe("1");
             expect(versionB.files[0].file).toBe("Final Fantasy VII (USA) (Disc 1) (Rev B).zip");
             expect(versionB.files[1].index).toBe("2");
@@ -401,8 +415,8 @@ describe("Test extractDiscInfo", () => {
         const version = game.versions[0];
         if(version.isMultiFile) {
             expect(version.files.length).toBe(2);
-            expect(version.commonTags.size).toBe(1);
-            expect(version.commonTags.has("Japan")).toBeTrue();
+            expect(version.tags.size).toBe(1);
+            expect(version.tags.has("Japan")).toBeTrue();
             expect(version.files[0].index).toBe("1");
             expect(version.files[0].file).toBe("Minakata Hakudou Toujou (Japan) (Disc 1) (2M).7z");
             expect(version.files[1].index).toBe("2");
@@ -428,9 +442,9 @@ describe("Test extractDiscInfo", () => {
         const version = game.versions[0]
         if(version.isMultiFile) {
             expect(version.files.length).toBe(3);
-            expect(version.commonTags.size).toBe(2);
-            expect(version.commonTags.has("Japan")).toBeTrue();
-            expect(version.commonTags.has("2M")).toBeTrue();
+            expect(version.tags.size).toBe(2);
+            expect(version.tags.has("Japan")).toBeTrue();
+            expect(version.tags.has("2M")).toBeTrue();
             expect(version.files[0].index).toBe("1");
             expect(version.files[0].file).toBe("Nanatsu no Hikan (Japan) (Disc 1) (2M).7z");
             expect(version.files[1].index).toBe("2");
@@ -461,9 +475,9 @@ describe("Test extractDiscInfo", () => {
         const version = game.versions[0]
         if(version.isMultiFile) {
             expect(version.files.length).toBe(2);
-            expect(version.commonTags.size).toBe(2);
-            expect(version.commonTags.has("Japan")).toBeTrue();
-            expect(version.commonTags.has("1M")).toBeTrue();
+            expect(version.tags.size).toBe(2);
+            expect(version.tags.has("Japan")).toBeTrue();
+            expect(version.tags.has("1M")).toBeTrue();
             expect(version.files[0].index).toBe("1");
             expect(version.files[0].file).toBe("Sentimental Graffiti (Japan) (Disc 1) (Game Disc) (1M).7z");
             expect(version.files[1].index).toBe("2");
@@ -510,7 +524,7 @@ describe("Test extractDiscInfo", () => {
         expect(game.title).toBe("Street Fighter Collection")
         for(const version of game.versions) {
             if(version.isMultiFile) {
-                expect(version.regions).toEqual(version.commonTags)
+                expect(version.regions).toEqual(version.tags)
             } else {
                 fail(`Version ${version.file} was not multi-file`)
             }

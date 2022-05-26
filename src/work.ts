@@ -1,10 +1,16 @@
 import { writeFile } from "fs";
-import path from "path";
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements, sortBadTagedFilesLast } from "./files";
+import path, { join } from "path";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements, sortBadTagedFilesLast, extractTitle } from "./files";
 import { findMostSuitableVersion } from "./sorting";
 import { SetToJSON } from "./util";
 
 export type ProcessResult = ReturnType<typeof setup> & {games: ProcessedGame[]}
+
+type GameWriteData = {
+    title: string,
+    languages: Set<string>,
+    fileAbsolutePaths: string[],
+};
 
 export function setup(
         inputBaseDirectory: string, 
@@ -40,7 +46,8 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
         if( !clearsTagRequirements(data.skipTagList, tags) )
             continue;
         const regionInfo = extractRegionInfo(tags)
-        titleGroups.push({...regionInfo, ...tags, ...file})
+        const gameTitle = extractTitle(file, tags);
+        titleGroups.push({...regionInfo, ...tags, ...file, gameTitle})
     }
 
     const gameGroups = groupGamesByTitle(titleGroups);
@@ -50,8 +57,30 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
     const filteredDiscGroups = discGroups.filter(g => clearsTitlePrefixRequirements(data.skipTitlePrefixList, g));
     const prioratisedGames = filteredDiscGroups.map(g => findMostSuitableVersion(g))
 
+    ///////////////////////////////////////////////////////////////////////
+    // Write all results to a file
     console.log("Grouping games done. Unique game titles:", prioratisedGames.length);
-    writeFile( path.join(data.outputAbsoultePath, "data.json"), JSON.stringify(prioratisedGames, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
+    writeFile( path.join(data.outputAbsoultePath, "all.json"), JSON.stringify(prioratisedGames, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
+
+    ///////////////////////////////////////////////////////////////////////
+    // Write best results to another file
+    const best = new Array<GameWriteData>();
+    for(const game of prioratisedGames) {
+        const fileAbsolutePaths = new Array<string>();
+        const bestVersion = game.bestVersion;
+        if(bestVersion.isMultiFile) {
+            fileAbsolutePaths.push( ...bestVersion.files.map(f => join(f.dir, f.file)) );
+        }
+        else {
+            fileAbsolutePaths.push( join(bestVersion.dir, bestVersion.file) );
+        }
+        best.push({
+            title: game.title,
+            languages: bestVersion.languages,
+            fileAbsolutePaths
+        })
+    }
+    writeFile( path.join(data.outputAbsoultePath, "best.json"), JSON.stringify(best, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
 
     return {...data, games: prioratisedGames}
 }

@@ -1,4 +1,4 @@
-import { extractTags, extractRegionInfo, groupGamesByTitle, extractDiscInfo } from "../src/files";
+import { extractTags, extractRegionInfo, groupGamesByTitle, extractDiscInfo, extractTitle } from "../src/files";
 import { filterCandidatesByProperty, findMostSuitableVersion, getLowestScore } from "../src/sorting"
 
 type TestData = {title: string, languages: Set<string>, regions: Set<string>}
@@ -15,7 +15,8 @@ function mkData(...data: [string, string[], string[]][]): TestData[] {
 function toGameWithVerions(...versions: string[]) {
     const g = versions.map(g => ({file:g, dir: ""}))
                  .map(g => ({...extractTags(g),...g}))
-                 .map(g => ({...extractRegionInfo(g), ...g}));
+                 .map(g => ({...extractRegionInfo(g), ...g}))
+                 .map(g => ({gameTitle: extractTitle(g,g), ...g}));
     const group = groupGamesByTitle(g);
     return extractDiscInfo(group[0]);
 }
@@ -102,5 +103,32 @@ describe("Test findMostSuitableVersion", () => {
         const best = findMostSuitableVersion(game).bestVersion;
         expect(best.languages).toContain("En")
         expect(best.regions).toContain("USA")
+    }),
+    it("can handle game with Ja and En langs with EU game", () => {
+        const game = toGameWithVerions(
+            "Ghostbusters (Japan) (Beta).zip",
+            "Ghostbusters (Europe).zip"
+        )
+        const best = findMostSuitableVersion(game).bestVersion;
+        expect(best.languages).toContain("En")
+        expect(best.regions).toContain("Europe")
+    })
+    it("prioratises En JP games over En EU games, but sort away [i] tags", () => {
+        const game = toGameWithVerions(
+            "Ghostbusters (Japan) [T-En] [i].zip",
+            "Ghostbusters (Europe).zip"
+        )
+        const best = findMostSuitableVersion(game).bestVersion;
+        expect(best.languages).toContain("En")
+        expect(best.regions).toContain("Europe")
+    })
+    it("prioratises En JP games over En EU games", () => {
+        const game = toGameWithVerions(
+            "Ghostbusters (Japan) [T-En].zip",
+            "Ghostbusters (Europe).zip"
+        )
+        const best = findMostSuitableVersion(game).bestVersion;
+        expect(best.languages).toContain("En")
+        expect(best.regions).toContain("Japan")
     })
 })

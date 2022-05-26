@@ -23,7 +23,3 @@ for (const collection of col.collections) {
     const res = run(data);
     processed.push(res);
 }
-
-for (const p of processed) {
-
-}
