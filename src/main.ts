@@ -1,7 +1,16 @@
 import * as C from "../collections.json"
-import path from "path";
+import path, { join } from "path";
 import { mkdirIfNotExists, titlefyString, verifyExists } from "./files";
 import { ProcessResult, run, setup } from "./work";
+import { existsSync } from "fs";
+import { exit } from "process";
+
+const clonelistDirLocation = join(".", "retool-submodule", "clonelists");
+console.log(clonelistDirLocation);
+if( !existsSync(clonelistDirLocation) ) {
+    console.error("Submodule not cloned. Please initialize the git submodule using 'git submodule init --update'")
+    exit(1);
+}
 
 const col = C as Collections;
 const inputBaseDirectory = path.resolve(col.inputDirectory);

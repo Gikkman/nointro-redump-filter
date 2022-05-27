@@ -38,51 +38,58 @@
         "4 games in 1",
         "4 games in one",
         "4 in 1",
-        "4-in-1",
-        "pokemon - version",
-        "pokemon - versione",
-        "pokemon - edicion",
-        "pokemon - smaragd",
-        "pokemon - safir",
-        "pokemon - rubin",
-        "pokemon - feuerrote",
-        "pokemon - blattgruene"
+        "4-in-1"
     ],
     "collections":[
         {
             "platform": "Nes",
+            "clonelists": [
+                "Nintendo - Nintendo Entertainment System.json",
+                "Nintendo - Family Computer Disk System (FDS).json"
+            ],
             "output": "Nintendo Entertainment System [nes]",
             "input": [
+                "Nintendo - Nintendo Entertainment System",
+                "Nintendo - Nintendo Entertainment System [Eng]",
                 "Nintendo - Famicom [Eng]",
                 "Nintendo - Famicom [T-En] Collection",
-                "Nintendo - Family Computer Disk System [T-En] Collection",
                 "Nintendo - NES - English Collection",
-                "Nintendo - Nintendo Entertainment System",
-                "Nintendo - Nintendo Entertainment System [Eng]"
+                "Nintendo - Famicom Disk System",
+                "Nintendo - Family Computer Disk System [T-En] Collection"
             ]
         },
         {
             "platform": "Snes",
+            "clonelists": [
+                "Nintendo - Super Nintendo Entertainment System.json"
+            ],
             "output": "Super Nintendo Entertainment System [snes]",
             "input": [
+                "Nintendo - Super Nintendo Entertainment System",
                 "Nintendo - Super Famicom [Eng]",
-                "Nintendo - Super Famicom [T-En] Collection",
-                "Nintendo - Super Nintendo Entertainment System"
+                "Nintendo - Super Famicom [T-En] Collection"
             ]
         },
         {
             "platform": "Game Boy",
             "output": "Nintendo Game Boy [gb]",
+            "clonelists": [
+                "Nintendo - Game Boy Color.json",
+                "Nintendo - Game Boy.json"
+            ],
             "input": [
-                "Nintendo - Game Boy",
-                "Nintendo - Game Boy [T-En] Collection",
                 "Nintendo - Game Boy Color",
-                "Nintendo - Game Boy Color [T-En] Collection"
+                "Nintendo - Game Boy Color [T-En] Collection",
+                "Nintendo - Game Boy",
+                "Nintendo - Game Boy [T-En] Collection"
             ]
         },
         {
             "platform": "Game Boy Advance",
             "output": "Nintendo Game Boy Advance [gba]",
+            "clonelists": [
+                "Nintendo - Game Boy Advance.json"
+            ],
             "input": [
                 "Nintendo - Game Boy Advance",
                 "Nintendo - Game Boy Advance [T-En] Collection"
@@ -91,6 +98,9 @@
         {
             "platform": "SG-1000",
             "output": "Sega SG-1000 [sg1]",
+            "clonelists": [
+                "Sega - SG-1000.json"
+            ],
             "input": [
                 "Sega - SG-1000",
                 "Sega - SG-1000 [T-En] Collection"
@@ -99,6 +109,9 @@
         {
             "platform": "Game Gear",
             "output": "Sega Game Gear [gg]",
+            "clonelists": [
+                "Sega - Game Gear.json"
+            ],
             "input": [
                 "Sega - Game Gear",
                 "Sega - Game Gear [T-En] Collection"
@@ -107,6 +120,9 @@
         {
             "platform": "Master System",
             "output": "Sega Master System [sms]",
+            "clonelists": [
+                "Sega - Master System - Mark III.json"
+            ],
             "input": [
                 "Sega - Master System - Mark III",
                 "No-Intro/Sega - Master System - Mark III",
@@ -116,6 +132,9 @@
         {
             "platform": "Sega Mega Drive",
             "output": "Sega Mega Drive [gen]",
+            "clonelists": [
+                "Sega - Mega Drive - Genesis.json"
+            ],
             "input": [
                 "Sega - Mega Drive - Genesis",
                 "Sega - Mega Drive [T-En] Collection"
@@ -124,6 +143,9 @@
         {
             "platform": "Sega Saturn",
             "output": "Sega Saturn [sat]",
+            "clonelists": [
+                "Sega - Saturn.json"
+            ],
             "input": [
                 "Sega - Saturn (Redump)",
                 "Sega - Saturn [T-En] Collection"
@@ -140,6 +162,9 @@
         {
             "platform": "Neo Geo Pocket Color",
             "output": "SNK Neo Geo Pocket Color [ngpc]",
+            "clonelists": [
+                "SNK - Neo Geo Pocket Color.json"
+            ],
             "input": [
                 "SNK - Neo Geo Pocket Color"
             ]
@@ -163,22 +188,14 @@
         {
             "platform": "Playstation",
             "inputDirectoryOverride": "/mnt/d/Games",
+            "clonelists": [
+                "Sony - PlayStation.json"
+            ],
             "output": "Sony Playstation [ps1]",
             "input": [
                 "Sony - PlayStation (America) (Games)",
                 "Sony - PlayStation (Asia) (Games)",
                 "Sony - PlayStation (Europe - Australia) (Games)"
-            ],
-            "unzip": true
-        },
-        {
-            "platform": "Playstation 2",
-            "inputDirectoryOverride": "/mnt/d/Games",
-            "output": "Sony Playstation 2 [ps2]",
-            "input": [
-                "Sony - PlayStation 2 (America) (Games) (#-F)",
-                "Sony - PlayStation 2 (America) (Games) (G-O)",
-                "Sony - PlayStation 2 (America) (Games) (P-Z)"
             ],
             "unzip": true
         }
