@@ -1,4 +1,4 @@
-import { recursiveIntersection, SetToJSON, substrBack, substrFront } from "../src/util";
+import { recursiveIntersection, SetToJSON, substrBack, substrFront, titlefyString } from "../src/util";
 
 describe("Test substrFront", function() {
     it("can handle single match with single pattern", function() {
@@ -99,4 +99,16 @@ describe("Test intersect", () => {
         const i = recursiveIntersection(arr1, arr2, arr3)
         expect(i.size).toBe(0);
     })
+})
+
+describe("Test titlefyString", () => {
+    it("can remove spaces", () => {
+        expect( titlefyString("a a") ).toBe("aa")
+    });
+    it("can remove special characters", () => {
+        expect( titlefyString("a!-.~*?!;_<>|\"'=äa") ).toBe("aa")
+    });
+    it("can convert numerals", () => {
+        expect( titlefyString("a2 5a") ).toBe("aiiva")
+    });
 })

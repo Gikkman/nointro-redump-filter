@@ -7,10 +7,12 @@ declare const DryRun: boolean;
 
 type Collection = {
     platform: string,
-    inputDirectoryOverride?: string
     output: string,
     input: string[],
     unzip?: boolean,
+    clonelists?: string[],
+    inputDirectoryOverride?: string,
+    skipTitles?: string[]
 }
 
 type Collections = {
@@ -19,7 +21,13 @@ type Collections = {
     skipTitles?: string[]
     inputDirectory: string,
     outputDirectory: string,
-    collections: Collection[],
+    collections: string[],
+}
+
+type CollectionRules = {
+    foreignTitleToEnglishTitle: Map<string, string>,
+    englishTitleToForeignTitles: Map<string, string[]>,
+    removeTitles: Array<string>,
 }
 
 type GameFile = {
@@ -65,6 +73,7 @@ type ProcessedGame = Game & {bestVersion: GameVersion}
 
 type GameWriteData = {
     title: string,
+    aliases?: string[],
     languages: Set<string>,
     fileAbsolutePaths: string[],
 };

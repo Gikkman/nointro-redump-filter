@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { recursiveIntersection, substrBack } from "./util";
+import { recursiveIntersection, titlefyString } from "./util";
 
 export function verifyExists(path: fs.PathLike) {
     if( !fs.existsSync(path) ) {
@@ -262,52 +262,23 @@ export function extractTitle(file: GameFile, tags: Tags) {
     return file.file.substring(0, end).trim();
 }
 
-export function groupGamesByTitle(files: FileInfo[]): TitleGroup[] {
+export function groupGamesByTitle(files: FileInfo[], titleAliases?: Map<string, string>): TitleGroup[] {
+    /*  The reason why we "titlefy" game titles to solve a lot of weird translation inconsistencies. Sometimes,
+        a game can have an extra space in the title, use regular numbers over roman numbers, have an extra '!' at
+        the end and so on. This tries to compensate for that.
+
+        The other thing we do is use title aliases which we load from retrool's "rename" lists. It is basically a list
+        of titles for games in other languages. So that alows us to resolve "La Adventura del Isles" to "Adventure Island"
+     */
     const games = new Map<string, TitleGroup>();
     for(const f of files) {
-        const gameName = titlefyString(f.gameTitle)
+        const aliasedName = titleAliases?.get(f.gameTitle) ?? f.gameTitle;
+        const gameName = titlefyString(aliasedName)
         const gameGroup = games.get(gameName) ?? {title: gameName, files: []};
         gameGroup.files.push(f);
         games.set(gameName, gameGroup);
     }
     return Array.from( games.values() );
-}
-
-export function titlefyString(s: string) {
-    const numberRegex = /[0-9]/g
-    const characterRegex = /[^a-zA-Z]/g    
-    return s.replace(numberRegex, numberToRoman).replace(characterRegex,"").toLowerCase();
-}
-
-function numberToRoman(s: string) {
-    switch(s) {
-        case '1': return 'i';
-        case '2': return 'ii';
-        case '3': return 'iii';
-        case '4': return 'iv';
-        case '5': return 'v';
-        case '6': return 'vi';
-        case '7': return 'vii';
-        case '8': return 'viii';
-        case '9': return 'ix';
-        case '10': return 'x';
-        case '11': return 'xi';
-        case '12': return 'xii';
-        case '13': return 'xiii';
-        case '14': return 'xiv';
-        case '15': return 'xv';
-        case '16': return 'xvi';
-        case '17': return 'xvii';
-        case '18': return 'xviii';
-        case '19': return 'xix';
-        case '20': return 'xx';
-        case '21': return 'xxi';
-        case '22': return 'xxii';
-        case '23': return 'xxiii';
-        case '24': return 'xxiv';
-        case '25': return 'xxv';
-        default: return s;
-    }
 }
 
 export function extractDiscInfo(group: TitleGroup): Game {

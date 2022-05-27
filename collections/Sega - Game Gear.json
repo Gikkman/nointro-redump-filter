@@ -1,0 +1,11 @@
+{
+    "platform": "Game Gear",
+    "output": "Sega Game Gear [gg]",
+    "clonelists": [
+        "Sega - Game Gear.json"
+    ],
+    "input": [
+        "Sega - Game Gear",
+        "Sega - Game Gear [T-En] Collection"
+    ]
+}

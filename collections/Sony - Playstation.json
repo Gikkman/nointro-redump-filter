@@ -1,0 +1,18 @@
+{
+    "platform": "Playstation",
+    "output": "Sony Playstation [ps1]",
+    "input": [
+        "Sony - PlayStation (America) (Games)",
+        "Sony - PlayStation (Asia) (Games)",
+        "Sony - PlayStation (Europe - Australia) (Games)"
+    ],
+    
+    "unzip": true,
+    "clonelists": [
+        "Sony - PlayStation.json"
+    ],
+    "inputDirectoryOverride": "/mnt/d/Games",
+    "skipTitles": [
+        "Tomb Raider III - Les Aventures de Lara Croft"
+    ]
+}

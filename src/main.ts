@@ -1,27 +1,26 @@
 import * as C from "../collections.json"
-import path, { join } from "path";
-import { mkdirIfNotExists, titlefyString, verifyExists } from "./files";
+import path from "path";
+import { mkdirIfNotExists, verifyExists } from "./files";
+import { clonelistDirExists, titlefyString } from "./util";
 import { ProcessResult, run, setup } from "./work";
-import { existsSync } from "fs";
 import { exit } from "process";
 
-const clonelistDirLocation = join(".", "retool-submodule", "clonelists");
-console.log(clonelistDirLocation);
-if( !existsSync(clonelistDirLocation) ) {
+if( !clonelistDirExists() ) {
     console.error("Submodule not cloned. Please initialize the git submodule using 'git submodule init --update'")
     exit(1);
 }
 
 const col = C as Collections;
 const inputBaseDirectory = path.resolve(col.inputDirectory);
+const collectionsDirectory = path.resolve("collections");
 const outputBaseDirectory = path.resolve(col.outputDirectory);
-const skipFileExtensions = col.skipFileExtensions?.map(s => s.toLowerCase()) ?? [];
-const skipTagList = col.skipTags?.map(s => s.toLowerCase()) ?? [];
-const skipTitlePrefixList = col.skipTitles?.map(s => titlefyString(s)) ?? [];
+const skipFileExtensions = col.skipFileExtensions ?? [];
+const skipTagList = col.skipTags ?? [];
+const skipTitlePrefixList = col.skipTitles ?? [];
 verifyExists(inputBaseDirectory);
+verifyExists(collectionsDirectory);
 mkdirIfNotExists(outputBaseDirectory)
 
-const args = process.argv.slice(2);
 const processed = new Array<ProcessResult>();
 
 for (const collection of col.collections) {
@@ -29,4 +28,5 @@ for (const collection of col.collections) {
     const data = setup(inputBaseDirectory, outputBaseDirectory, skipFileExtensions, skipTagList, skipTitlePrefixList, collection);
     const res = run(data);
     processed.push(res);
+    console.log("-----")
 }

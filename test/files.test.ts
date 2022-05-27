@@ -1,5 +1,5 @@
 import path from "path"
-import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements, extractTitle, titlefyString } from "../src/files";
+import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements, extractTitle } from "../src/files";
 
 function toGameFile(...str: string[]): FileInfo[] {
     const g = str.map(g => ({file:g, dir: ""}))
@@ -236,18 +236,6 @@ describe("Test extractTitle", () => {
         const file = toGameFile("Advanced Dungeons & Dragons - Dragons of Flame.nes")[0];
         const title = extractTitle(file, file);
         expect(title).toBe("Advanced Dungeons & Dragons - Dragons of Flame")
-    });
-})
-
-describe("Test titlefyString", () => {
-    it("can remove spaces", () => {
-        expect( titlefyString("a a") ).toBe("aa")
-    });
-    it("can remove special characters", () => {
-        expect( titlefyString("a!-.~*?!;_<>|\"'=äa") ).toBe("aa")
-    });
-    it("can convert numerals", () => {
-        expect( titlefyString("a2 5a") ).toBe("aiiva")
     });
 })
 
