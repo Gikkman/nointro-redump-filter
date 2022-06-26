@@ -1,8 +1,7 @@
-import { writeFile } from "fs";
-import path, { join } from "path";
+import path from "path";
 import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements, extractTitle } from "./files";
 import { findMostSuitableVersion } from "./sorting";
-import { loadClonelist, loadCollection, SetToJSON, titlefyString } from "./util";
+import { loadClonelist, loadCollection, titlefyString, writeJsonToDisc } from "./util";
 
 export type ProcessResult = ReturnType<typeof setup> & {games: ProcessedGame[]}
 
@@ -92,28 +91,7 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
     ///////////////////////////////////////////////////////////////////////
     // Write all results to a file
     console.log("Grouping games done. Unique game titles:", prioratisedGames.length);
-    writeFile( path.join(data.outputAbsoultePath, "all.json"), JSON.stringify(prioratisedGames, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
-
-    ///////////////////////////////////////////////////////////////////////
-    // Write best results to another file
-    const best = new Array<GameWriteData>();
-    for(const game of prioratisedGames) {
-        const fileAbsolutePaths = new Array<string>();
-        const bestVersion = game.bestVersion;
-        if(bestVersion.isMultiFile) {
-            fileAbsolutePaths.push( ...bestVersion.files.map(f => join(f.dir, f.file)) );
-        }
-        else {
-            fileAbsolutePaths.push( join(bestVersion.dir, bestVersion.file) );
-        }
-        best.push({
-            title: bestVersion.gameTitle,
-            aliases: data.collectionRules.englishTitleToForeignTitles.get(bestVersion.gameTitle),
-            languages: bestVersion.languages,
-            fileAbsolutePaths
-        })
-    }
-    writeFile( path.join(data.outputAbsoultePath, "best.json"), JSON.stringify(best, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
+    writeJsonToDisc(prioratisedGames, data.outputAbsoultePath, "all.json")
 
     return {...data, games: prioratisedGames}
 }

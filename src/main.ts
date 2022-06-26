@@ -1,7 +1,7 @@
 import * as C from "../collections.json"
 import path from "path";
 import { mkdirIfNotExists, verifyExists } from "./files";
-import { clonelistDirExists, titlefyString } from "./util";
+import { clonelistDirExists } from "./util";
 import { ProcessResult, run, setup } from "./work";
 import { exit } from "process";
 

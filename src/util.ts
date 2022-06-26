@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "fs";
+import { existsSync, readFileSync, writeFile } from "fs";
 import { join, resolve } from "path";
 
 /** Search a string for each pattern. For the pattern that is found furthest from the
@@ -135,4 +135,8 @@ function numberToRoman(s: string) {
         case '25': return 'xxv';
         default: return s;
     }
+}
+
+export function writeJsonToDisc(json: object, filepath: string, filename: string) {
+    writeFile( join(filepath, filename), JSON.stringify(json, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
 }

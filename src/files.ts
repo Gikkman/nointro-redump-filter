@@ -11,11 +11,11 @@ export function verifyExists(path: fs.PathLike) {
     }
 }
 
-export function mkdirIfNotExists(path: fs.PathLike): void {
+export function mkdirIfNotExists(path: fs.PathLike, printLogs: boolean = true): void {
     if( fs.existsSync(path) ) {
         const stat = fs.statSync(path);
         if( stat.isDirectory() ) {
-            console.log("Directory existed:", path)
+            if(printLogs) console.log("Directory existed:", path)
             return;
         }
         else {
@@ -24,7 +24,7 @@ export function mkdirIfNotExists(path: fs.PathLike): void {
         }
     }
     fs.mkdirSync(path, {recursive: true});
-    console.log("Directory created:", path)
+    if(printLogs) console.log("Directory created:", path)
     return;
 }
 
