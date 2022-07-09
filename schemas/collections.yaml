@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+$schema: 'http://json-schema.org/draft-07/schema'
+description: 'A schema for writing the main collections definitions. Most values in this file can be extended by the individual collection configs'
+title: "Collections Schema"
+type: object
+properties:
+    inputRootDirectory:
+        description: "Base directory to look up each individual collection's input directories. This can be overridden in an individual collection's config file using the 'inputDirectoryRootOverride' key"
+        type: string
+    outputRootDirectory:
+        description: "Base directory to write each collection's output to"
+        type: string
+    skipFileExtensions:
+        description: "File extensions (without a '.') to skip. Any file encountered with this file extension will be skipped. This can be extended in individual collection's config files by using the same key"
+        type: array
+        items:
+            type: string
+    skipFileTags:
+        description: "File tags to skip. Any file encountered with this tag will not be skipped. This can be extended in individual collection's config files by using the same key"
+        type: array
+        items:
+            type: string
+    skipFilePrefixes:
+        description: "File prefixes to skip. Any file which's name starts with this prefix will be skipped. This can be extended in individual collection's config files by using the same key"
+        type: array
+        items:
+            type: string
+    collections:
+        description: "Name of collection files to load (from the 'collections' folder)"
+        type: array
+        items:
+            type: string
+required:
+    - inputRootDirectory
+    - outputRootDirectory
+    - collections
+additionalProperties: false

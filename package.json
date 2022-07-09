@@ -21,7 +21,9 @@
     },
     "homepage": "https://github.com/Gikkman/nointro-redump-filter#readme",
     "dependencies": {
-        "properties-reader": "^2.2.0"
+        "node-stream-zip": "^1.15.0",
+        "properties-reader": "^2.2.0",
+        "yaml": "^2.1.1"
     },
     "devDependencies": {
         "@types/jasmine": "^3.10.2",

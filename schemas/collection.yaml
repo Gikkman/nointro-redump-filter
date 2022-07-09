@@ -1,0 +1,64 @@
+# yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
+$schema: "http://json-schema.org/draft-07/schema"
+description: "A schema for writing each individual collection's definition"
+title: "Collection Schema"
+type: object
+properties:
+    platform:
+        description: "Which platform does this collection represent"
+        type: string
+        examples:
+            - "Nintendo Entertainment System"
+            - "Playstation"
+    output:
+        description: "Name of the output folder for this collection"
+        type: string
+        examples:
+            - "Nintendo Entertainment System [NES]"
+            - "Playstation [PS1]"
+    input:
+        description: "Relative path to all folders to use as input for this collection"
+        type: array
+        minItems: 1
+        items:
+            type: string
+    unzip:
+        description: "If a zip file is encountered in the collection, should it be unzipped, and where"
+        type: string
+        enum:
+            - "same-folder"
+            - "sub-folder"
+    clonelists:
+        description: "Clone lists are taken from the retool-submodule/clonelists, and contains information about other names "
+        type: array
+        items:
+            type: string
+        examples:
+            - Nintendo - Nintendo Entertainment System.json
+            - Sony - PlayStation.json
+    inputDirectoryRootOverride:
+        description: "Overrides the root folder for which to look up input folders for this collection"
+        type: string
+        examples:
+            - /mnt/d/my-games
+            - c:\\someDir
+    skipFileExtensions:
+        description: "File extensions (without a '.') to skip. Any file encountered with this file extension will be skipped. This extends the list from the core collections config"
+        type: array
+        items:
+            type: string
+    skipFileTags:
+        description: "File tags to skip. Any file encountered with this tag will not be skipped. This extends the list from the core collections config"
+        type: array
+        items:
+            type: string
+    skipFilePrefixes:
+        description: "File prefixes to skip. Any file which's name starts with this prefix will be skipped. This extends the list from the core collections config"
+        type: array
+        items:
+            type: string
+required:
+    - platform
+    - output
+    - input
+additionalProperties: false

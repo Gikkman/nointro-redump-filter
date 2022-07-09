@@ -9,23 +9,23 @@ export function setup(
         inputBaseDirectory: string, 
         outputBaseDirectory: string, 
         skipFileExtensions: string[], 
-        skipTagList: string[], 
-        skipTitlePrefixList: string[], 
+        skipFileTags: string[], 
+        skipTitlePrefixes: string[], 
         collectionFile: string
         ) {
     const collection = loadCollection(collectionFile);
     console.log(collection);
     
-    const inputDirectory = collection.inputDirectoryOverride ?? inputBaseDirectory;
+    const inputRootDirectory = collection.inputDirectoryRootOverride ?? inputBaseDirectory;
+    const inputAbsolutePaths = collection.input.map(elem => path.join(inputRootDirectory, elem));
     const outputAbsoultePath = path.join(outputBaseDirectory, collection.output);
-    const inputAbsolutePaths = collection.input.map(elem => path.join(inputDirectory, elem));
     mkdirIfNotExists(outputAbsoultePath);
 
     const collectionRules = clonelistDataToCollectionRule(collection.clonelists)
     return {
         skipFileExtensions: new Set<string>( skipFileExtensions.map(s => s.toLowerCase()) ),
-        skipTagList: new Set<string>( [...skipTagList].map(s => s.toLowerCase()) ), 
-        skipTitlePrefixList: new Set<string>( [...collectionRules.removeTitles, ...skipTitlePrefixList, ...collection.skipTitles ?? []].map(titlefyString) ),
+        skipFileTags: new Set<string>( [...skipFileTags].map(s => s.toLowerCase()) ), 
+        skipTitlePrefixes: new Set<string>( [...collectionRules.removeTitles, ...skipTitlePrefixes, ...collection.skipFilePrefixes ?? []].map(titlefyString) ),
         inputAbsolutePaths,
         outputAbsoultePath,
         collectionRules,
@@ -76,7 +76,7 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
     const titleGroups = new Array<FileInfo>();
     for(const file of files) {
         const tags = extractTags(file)
-        if( !clearsTagRequirements(data.skipTagList, tags) )
+        if( !clearsTagRequirements(data.skipFileTags, tags) )
             continue;
         const regionInfo = extractRegionInfo(tags)
         const gameTitle = extractTitle(file, tags);
@@ -85,7 +85,7 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
 
     const gameGroups = groupGamesByTitle(titleGroups, data.collectionRules.foreignTitleToEnglishTitle);
     const discGroups = gameGroups.map(g => extractDiscInfo(g)).sort((a,b) => a.title.localeCompare(b.title))
-    const filteredDiscGroups = discGroups.filter(g => clearsTitlePrefixRequirements(data.skipTitlePrefixList, g));
+    const filteredDiscGroups = discGroups.filter(g => clearsTitlePrefixRequirements(data.skipTitlePrefixes, g));
     const prioratisedGames = filteredDiscGroups.map(g => findMostSuitableVersion(g))
 
     ///////////////////////////////////////////////////////////////////////

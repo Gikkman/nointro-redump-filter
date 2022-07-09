@@ -1,0 +1,8 @@
+platform: 'Master System'
+output: 'Sega Master System [sms]'
+clonelists:
+    - 'Sega - Master System - Mark III.json'
+input:
+    - 'Sega - Master System - Mark III'
+    - 'No-Intro/Sega - Master System - Mark III'
+    - 'Sega - Master System [T-En] Collection'

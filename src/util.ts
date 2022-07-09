@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, writeFile } from "fs";
 import { join, resolve } from "path";
+import * as yaml from "yaml";
 
 /** Search a string for each pattern. For the pattern that is found furthest from the
  * start of the string, create a substring from 0 to that point.
@@ -73,7 +74,7 @@ export function loadCollection(filename: string): Collection {
         console.error(`Can't load collection file: ${filename}. File not found at ${file}`)
         process.exit(1);
     }
-    const collection = JSON.parse(readFileSync(file, 'utf8'));
+    const collection = loadYaml(file);
     if( !isValidCollection(collection) ) {
         console.error(`Invalid collection definition found at ${file}. Please check the file structure.`)
         console.error(collection);
@@ -82,16 +83,20 @@ export function loadCollection(filename: string): Collection {
     return collection;
 }
 
+export function loadYaml(path: string) : any {
+    return yaml.parse( readFileSync(path, 'utf-8'), { strict: true} )
+}
+
 function isValidCollection(data: any): data is Collection {
     const baseInfo = !!data.platform 
-        && !!data.output 
-        && !!data.input 
+        && !!data.output
+        && !!data.input
         && data.input.length > 0;
-    const unzipInfo = data.unzip !== undefined ? typeof data.unzip === 'boolean' : true;
+    const unzipInfo = data.unzip !== undefined ? (data.unzip === 'sub-folder' || data.unzip === 'same-folder') : true;
     const clonelistInfo = data.clonelist !== undefined ? Array.isArray(data.clonelist) : true;
     const iOverideInfo = data.inputDirectoryOverride !== undefined ? typeof data.inputDirectoryOverride === 'string' : true;
-    const iSkipInfo = data.skipTitles !== undefined ? Array.isArray(data.skipTitles) : true
-    return baseInfo && unzipInfo && clonelistInfo && iOverideInfo && iSkipInfo;
+    const iSkipFilePrefixes = data.skipFilePrefixes !== undefined ? Array.isArray(data.skipFilePrefixes) : true
+    return baseInfo && unzipInfo && clonelistInfo && iOverideInfo && iSkipFilePrefixes;
 }
 
 export function loadClonelist(filename: string): any {

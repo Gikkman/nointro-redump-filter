@@ -11,16 +11,16 @@ type Collection = {
     input: string[],
     unzip?: boolean,
     clonelists?: string[],
-    inputDirectoryOverride?: string,
-    skipTitles?: string[]
+    inputDirectoryRootOverride?: string,
+    skipFilePrefixes?: string[]
 }
 
 type Collections = {
+    inputRootDirectory: string,
+    outputRootDirectory: string,
     skipFileExtensions?: string[],
-    skipTags?: string[],
-    skipTitles?: string[]
-    inputDirectory: string,
-    outputDirectory: string,
+    skipFileTags?: string[],
+    skipFilePrefixes?: string[]
     collections: string[],
 }
 

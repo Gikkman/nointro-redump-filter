@@ -1,0 +1,12 @@
+platform: Playstation
+output: 'Sony Playstation [ps1]'
+input:
+    - 'Sony - PlayStation (America) (Games)'
+    - 'Sony - PlayStation (Asia) (Games)'
+    - 'Sony - PlayStation (Europe - Australia) (Games)'
+unzip: sub-folder
+clonelists:
+    - 'Sony - PlayStation.json'
+inputDirectoryRootOverride: '/mnt/d/Games'
+skipFilePrefixes:
+    - 'Tomb Raider III - Les Aventures de Lara Croft'

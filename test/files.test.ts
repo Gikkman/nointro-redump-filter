@@ -18,7 +18,7 @@ describe("Test listFilesFlat", () => {
     it("can handle nested directories", () => {
         const testInputPath = path.join(__dirname, "test-input");
         const testInputFileList = listFilesFlat(new Set(), testInputPath);
-        expect(testInputFileList.length).toBe(9)
+        expect(testInputFileList.length).toBe(10)
     });
     it("can handle flat directories", () => {
         const testInputPath = path.join(__dirname, "test-input", "inner-2");

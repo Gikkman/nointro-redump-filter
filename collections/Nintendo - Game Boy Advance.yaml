@@ -1,0 +1,9 @@
+platform: 'Game Boy Advance'
+output: 'Nintendo Game Boy Advance [gba]'
+clonelists:
+    - 'Nintendo - Game Boy Advance.json'
+input:
+    - 'Nintendo - Game Boy Advance'
+    - 'Nintendo - Game Boy Advance [T-En] Collection'
+skipFilePrefixes:
+    - 'Game Boy Advance Video'

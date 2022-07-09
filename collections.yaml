@@ -1,0 +1,51 @@
+inputRootDirectory: /mnt/u/Spel
+outputRootDirectory: output
+skipFileExtensions:
+    - chd
+    - mp3
+    - exe
+    - txt
+    - doc
+    - docx
+    - pdf
+    - md
+    - info
+skipFileTags:
+    - demo
+    - demo 1
+    - demo 2
+    - program
+skipFilePrefixes:
+    - '[bios]'
+    - action replay
+    - game genie
+    - 2 game pack
+    - 2 games in 1
+    - 2 games in one
+    - 2 in 1
+    - 2-in-1
+    - 3 game pack
+    - 3 games in 1
+    - 3 games in one
+    - 3 in 1
+    - 3-in-1
+    - 4 game pack
+    - 4 games in 1
+    - 4 games in one
+    - 4 in 1
+    - 4-in-1
+collections:
+    - Nintendo - Nintendo Entertainment System.yaml
+    - Nintendo - Super Nintendo Entertainment System.yaml
+    - Nintendo - Game Boy.yaml
+    - Nintendo - Game Boy Advance.yaml
+    - Sega - SG-1000.yaml
+    - Sega - Game Gear.yaml
+    - Sega - Master System - Mark III.yaml
+    - Sega - Mega Drive - Genesis.yaml
+    - Sega - Saturn.yaml
+    - SNK - Neo Geo Pocket.yaml
+    - SNK - Neo Geo Pocket Color.yaml
+    - NEC - PC Engine - TurboGrafx 16.yaml
+    - 'NEC - PC Engine CD & TurboGrafx CD.yaml'
+    - Sony - Playstation.yaml

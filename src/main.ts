@@ -1,7 +1,6 @@
-import * as C from "../collections.json"
 import path from "path";
 import { mkdirIfNotExists, verifyExists } from "./files";
-import { clonelistDirExists } from "./util";
+import { clonelistDirExists, loadYaml } from "./util";
 import { ProcessResult, run, setup } from "./work";
 import { exit } from "process";
 
@@ -10,13 +9,13 @@ if( !clonelistDirExists() ) {
     exit(1);
 }
 
-const col = C as Collections;
-const inputBaseDirectory = path.resolve(col.inputDirectory);
+const col = loadYaml("collections.yaml") as Collections;
+const inputBaseDirectory = path.resolve(col.inputRootDirectory);
 const collectionsDirectory = path.resolve("collections");
-const outputBaseDirectory = path.resolve(col.outputDirectory);
+const outputBaseDirectory = path.resolve(col.outputRootDirectory);
 const skipFileExtensions = col.skipFileExtensions ?? [];
-const skipTagList = col.skipTags ?? [];
-const skipTitlePrefixList = col.skipTitles ?? [];
+const skipFileTags = col.skipFileTags ?? [];
+const skipFilePrefixes = col.skipFilePrefixes ?? [];
 verifyExists(inputBaseDirectory);
 verifyExists(collectionsDirectory);
 mkdirIfNotExists(outputBaseDirectory)
@@ -25,7 +24,7 @@ const processed = new Array<ProcessResult>();
 
 for (const collection of col.collections) {
     console.log("Processing rom collection:", collection);
-    const data = setup(inputBaseDirectory, outputBaseDirectory, skipFileExtensions, skipTagList, skipTitlePrefixList, collection);
+    const data = setup(inputBaseDirectory, outputBaseDirectory, skipFileExtensions, skipFileTags, skipFilePrefixes, collection);
     const res = run(data);
     processed.push(res);
     console.log("-----")
