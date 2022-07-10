@@ -1,7 +1,7 @@
 platform: 'Sega Mega Drive'
-output: 'Sega Mega Drive [gen]'
-clonelists:
-    - 'Sega - Mega Drive - Genesis.json'
+output: 'Sega - Mega Drive - Genesis [md]'
 input:
     - 'Sega - Mega Drive - Genesis'
     - 'Sega - Mega Drive [T-En] Collection'
+clonelists:
+    - 'Sega - Mega Drive - Genesis.json'

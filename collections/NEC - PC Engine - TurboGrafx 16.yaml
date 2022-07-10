@@ -1,7 +1,9 @@
 platform: 'TurboGrafx 16'
-output: 'TurboGrafx 16 [tg16]'
-clonelists:
-    - 'NEC - PC Engine - TurboGrafx 16.json'
+output: 'NEC - PC Engine - TurboGrafx 16 [tg16]'
 input:
     - 'NEC - PC Engine - TurboGrafx 16'
     - 'NEC - PC Engine [T-En] Collection'
+clonelists:
+    - 'NEC - PC Engine - TurboGrafx 16.json'
+skipFilePrefixes:
+    - "_NEC"

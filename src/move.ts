@@ -18,16 +18,22 @@ export async function moveGames(data: ProcessResult) {
     mkdirIfNotExists(data.outputAbsoultePath);
     
     const bestGames = buildBestGamesJson(data);
-    writeJsonToDisc(bestGames, data.outputAbsoultePath, "best.json")
+   
 
     for(const game of bestGames) {
         if(data.unzip) {
-
+            const createGameFolder = data.unzip === 'sub-folder'
+            unzipGameToOutputLocation(game, data.outputAbsoultePath, createGameFolder)
+            if(data.generateMultiDiscXML === 'BizhawkXML') {
+                // TODO: Generate XML file
+            }
         }
         else {
             copyGameToOutputLocation(game, data.outputAbsoultePath);
         }
     }
+    // TODO: Write "best.json" with info from what we copied or extracted
+    writeJsonToDisc(bestGames, data.outputAbsoultePath, "best.json")
 }
 
 function buildBestGamesJson(data: ProcessResult) {
@@ -58,11 +64,11 @@ function buildBestGamesJson(data: ProcessResult) {
  * 
  * @param game 
  * @param outputDirectoryPath 
- * @returns true if one or more files were copied
+ * @returns Relative file path to all concerned game files (copied or already preset), and true if any files were copied
  */
 export async function copyGameToOutputLocation(game: GameWriteData, outputDirectoryPath: string) {
     const promises = new Array<Promise<void>>();
-
+    const gameFiles = new Array<string>();
     for(const src of game.fileAbsolutePaths) {
         const filename = basename(src)
         const dest = join(outputDirectoryPath, filename);
@@ -70,13 +76,13 @@ export async function copyGameToOutputLocation(game: GameWriteData, outputDirect
             const cf = copyFile(src, dest, constants.COPYFILE_EXCL)
             promises.push(cf);
         }
+        gameFiles.push(filename);
     }
 
     if(promises.length > 0) {
         await Promise.all(promises);
-        return true;
     }
-    return false;
+    return {gameFiles, changesMade: promises.length > 0};
 }
 
 /** Tries to unzip a game to an output directory. If a file with the same name already exists at the output
@@ -85,15 +91,16 @@ export async function copyGameToOutputLocation(game: GameWriteData, outputDirect
  * @param game                  The game data
  * @param outputDirectoryPath   Path to the directory to unzip to
  * @param createGameFolder      Shall the function create a folder named after the zip file and unzip to that
- * @returns true if one or more files were unzipped
+ * @returns Relative file path to all concerned game files (unzipped or already preset), and true if any files were unzipped
  */
 export async function unzipGameToOutputLocation(game: GameWriteData, outputDirectoryPath: string, createGameFolder = false) {
-    let modified = false;
-    
+    const gameFiles = new Array<string>();
+    let changesMade = false;
     for(const src of game.fileAbsolutePaths) {
         const filename = basename(src);
+        const filenameNoExtension = filename.slice(0, filename.lastIndexOf("."));
         const outputDirectoryPathEnhanced = createGameFolder 
-            ? join(outputDirectoryPath, filename.slice(0, filename.lastIndexOf("."))) 
+            ? join(outputDirectoryPath, filenameNoExtension) 
             : outputDirectoryPath;
         mkdirIfNotExists(outputDirectoryPathEnhanced, false);
         
@@ -108,10 +115,16 @@ export async function unzipGameToOutputLocation(game: GameWriteData, outputDirec
                 else {
                     await zip.extract(entry, path);
                 }
-                modified = true;
+                changesMade = true;
             }
+            if(!entry.isDirectory){
+                if(createGameFolder)
+                    gameFiles.push(join(filenameNoExtension, entry.name));
+                else
+                    gameFiles.push(entry.name);
+            } 
         }
         await zip.close()
     }
-    return modified;
+    return {gameFiles, changesMade};
 }

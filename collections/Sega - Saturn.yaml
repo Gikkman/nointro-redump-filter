@@ -1,8 +1,9 @@
 platform: 'Sega Saturn'
-output: 'Sega Saturn [sat]'
-clonelists:
-    - 'Sega - Saturn.json'
+output: 'Sega - Saturn [sat]'
 input:
     - 'Sega - Saturn (Redump)'
     - 'Sega - Saturn [T-En] Collection'
+clonelists:
+    - 'Sega - Saturn.json'
 unzip: sub-folder
+generateMultiDiscFile: 'BizhawkXML'

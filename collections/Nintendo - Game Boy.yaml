@@ -1,10 +1,7 @@
 platform: 'Game Boy'
-output: 'Nintendo Game Boy [gb]'
-clonelists:
-    - 'Nintendo - Game Boy Color.json'
-    - 'Nintendo - Game Boy.json'
+output: 'Nintendo - Game Boy [gb]'
 input:
-    - 'Nintendo - Game Boy Color'
-    - 'Nintendo - Game Boy Color [T-En] Collection'
     - 'Nintendo - Game Boy'
     - 'Nintendo - Game Boy [T-En] Collection'
+clonelists:
+    - 'Nintendo - Game Boy.json'

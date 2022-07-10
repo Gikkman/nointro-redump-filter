@@ -1,7 +1,7 @@
 platform: 'Game Gear'
-output: 'Sega Game Gear [gg]'
-clonelists:
-    - 'Sega - Game Gear.json'
+output: 'Sega - Game Gear [gg]'
 input:
     - 'Sega - Game Gear'
     - 'Sega - Game Gear [T-En] Collection'
+clonelists:
+    - 'Sega - Game Gear.json'

@@ -1,6 +1,6 @@
 platform: 'Neo Geo Pocket Color'
-output: 'SNK Neo Geo Pocket Color [ngpc]'
-clonelists:
-    - 'SNK - Neo Geo Pocket Color.json'
+output: 'SNK - Neo Geo Pocket Color [ngpc]'
 input:
     - 'SNK - Neo Geo Pocket Color'
+clonelists:
+    - 'SNK - Neo Geo Pocket Color.json'

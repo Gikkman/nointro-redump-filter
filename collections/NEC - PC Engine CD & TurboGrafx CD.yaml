@@ -1,7 +1,0 @@
-platform: 'TurboGrafx 16 CD'
-output: 'TurboGrafx 16 [tg16cd]'
-clonelists:
-    - 'NEC - PC Engine CD & TurboGrafx CD.json'
-input:
-    - 'NEC - PC Engine CD & TurboGrafx CD'
-unzip: sub-folder

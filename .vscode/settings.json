@@ -1,6 +1,10 @@
 {
   "yaml.schemas": {
-    "schemas/collections.yaml": ["collections.yaml"],
-    "schemas/collection.yaml": ["collections/*.yaml"],
+    "schemas/collections.yaml": [
+      "collections.yaml"
+    ],
+    "schemas/collection.yaml": [
+      "collections/*.yaml"
+    ],
   }
 }

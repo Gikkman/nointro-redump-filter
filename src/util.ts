@@ -96,7 +96,8 @@ function isValidCollection(data: any): data is Collection {
     const clonelistInfo = data.clonelist !== undefined ? Array.isArray(data.clonelist) : true;
     const iOverideInfo = data.inputDirectoryOverride !== undefined ? typeof data.inputDirectoryOverride === 'string' : true;
     const iSkipFilePrefixes = data.skipFilePrefixes !== undefined ? Array.isArray(data.skipFilePrefixes) : true
-    return baseInfo && unzipInfo && clonelistInfo && iOverideInfo && iSkipFilePrefixes;
+    const discConfig = data.generateMultiDiscXML !== undefined ? data.generateMultiDiscXML === 'BizhawkXML' : true
+    return baseInfo && unzipInfo && clonelistInfo && iOverideInfo && iSkipFilePrefixes && discConfig;
 }
 
 export function loadClonelist(filename: string): any {

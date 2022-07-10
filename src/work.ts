@@ -29,8 +29,9 @@ export function setup(
         inputAbsolutePaths,
         outputAbsoultePath,
         collectionRules,
-        unzip: collection.unzip ?? false,
+        unzip: collection.unzip,
         platform: collection.platform,
+        generateMultiDiscXML: collection.generateMultiDiscXML
     }
 }
 

@@ -1,8 +1,5 @@
 platform: Nes
-clonelists:
-    - 'Nintendo - Nintendo Entertainment System.json'
-    - 'Nintendo - Family Computer Disk System (FDS).json'
-output: 'Nintendo Entertainment System [nes]'
+output: 'Nintendo - Nintendo Entertainment System [nes]'
 input:
     - 'Nintendo - Nintendo Entertainment System'
     - 'Nintendo - Nintendo Entertainment System [Eng]'
@@ -11,3 +8,6 @@ input:
     - 'Nintendo - NES - English Collection'
     - 'Nintendo - Famicom Disk System'
     - 'Nintendo - Family Computer Disk System [T-En] Collection'
+clonelists:
+    - 'Nintendo - Nintendo Entertainment System.json'
+    - 'Nintendo - Family Computer Disk System (FDS).json'

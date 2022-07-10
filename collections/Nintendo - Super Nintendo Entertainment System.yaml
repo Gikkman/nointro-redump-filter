@@ -1,8 +1,8 @@
 platform: Snes
-clonelists:
-    - 'Nintendo - Super Nintendo Entertainment System.json'
-output: 'Super Nintendo Entertainment System [snes]'
+output: 'Nintendo - Super Nintendo Entertainment System [snes]'
 input:
     - 'Nintendo - Super Nintendo Entertainment System'
     - 'Nintendo - Super Famicom [Eng]'
     - 'Nintendo - Super Famicom [T-En] Collection'
+clonelists:
+    - 'Nintendo - Super Nintendo Entertainment System.json'

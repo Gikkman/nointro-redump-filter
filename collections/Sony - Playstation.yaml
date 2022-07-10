@@ -1,10 +1,11 @@
 platform: Playstation
-output: 'Sony Playstation [ps1]'
+output: 'Sony - Playstation [psx]'
 input:
     - 'Sony - PlayStation (America) (Games)'
     - 'Sony - PlayStation (Asia) (Games)'
     - 'Sony - PlayStation (Europe - Australia) (Games)'
 unzip: sub-folder
+generateMultiDiscFile: 'BizhawkXML'
 clonelists:
     - 'Sony - PlayStation.json'
 inputDirectoryRootOverride: '/mnt/d/Games'

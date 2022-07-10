@@ -1,0 +1,7 @@
+platform: 'Game Boy Color'
+output: 'Nintendo - Game Boy Color [gbc]'
+input:
+    - 'Nintendo - Game Boy Color'
+    - 'Nintendo - Game Boy Color [T-En] Collection'
+clonelists:
+    - 'Nintendo - Game Boy Color.json'

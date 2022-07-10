@@ -38,6 +38,7 @@ collections:
     - Nintendo - Nintendo Entertainment System.yaml
     - Nintendo - Super Nintendo Entertainment System.yaml
     - Nintendo - Game Boy.yaml
+    - Nintendo - Game Boy Color.yaml
     - Nintendo - Game Boy Advance.yaml
     - Sega - SG-1000.yaml
     - Sega - Game Gear.yaml
@@ -47,5 +48,6 @@ collections:
     - SNK - Neo Geo Pocket.yaml
     - SNK - Neo Geo Pocket Color.yaml
     - NEC - PC Engine - TurboGrafx 16.yaml
-    - 'NEC - PC Engine CD & TurboGrafx CD.yaml'
+    - NEC - PC Engine CD - TurboGrafx 16 - CD.yaml
+    - NEC - PC FX.yaml
     - Sony - Playstation.yaml

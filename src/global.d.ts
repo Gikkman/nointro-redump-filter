@@ -9,10 +9,11 @@ type Collection = {
     platform: string,
     output: string,
     input: string[],
-    unzip?: boolean,
+    unzip?: 'sub-folder' | 'same-folder',
     clonelists?: string[],
     inputDirectoryRootOverride?: string,
-    skipFilePrefixes?: string[]
+    skipFilePrefixes?: string[],
+    generateMultiDiscXML?: "BizhawkXML",
 }
 
 type Collections = {
