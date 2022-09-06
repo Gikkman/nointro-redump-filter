@@ -3,7 +3,8 @@ import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, lis
 import { findMostSuitableVersion } from "./sorting";
 import { loadClonelist, loadCollection, titlefyString, writeJsonToDisc } from "./util";
 
-export type ProcessResult = ReturnType<typeof setup> & {games: ProcessedGame[]}
+export type SetupData =  ReturnType<typeof setup>;
+export type ProcessResult = SetupData & {games: ProcessedGame[]}
 
 export function setup(
         inputBaseDirectory: string, 
@@ -31,7 +32,7 @@ export function setup(
         collectionRules,
         unzip: collection.unzip,
         platform: collection.platform,
-        generateMultiDiscXML: collection.generateMultiDiscXML
+        generateMultiDiscFile: collection.generateMultiDiscFile
     }
 }
 

@@ -1,10 +1,13 @@
-import { constants, existsSync } from "fs";
-import { access, copyFile, stat } from "fs/promises";
+import { closeSync, constants, existsSync, openSync } from "fs";
+import { copyFile } from "fs/promises";
 import StreamZip from "node-stream-zip";
 import { join, basename } from "path";
 import { mkdirIfNotExists } from "./files";
 import { writeJsonToDisc } from "./util";
 import { ProcessResult } from "./work";
+import { writeBizhawkXmlFile } from "./xml-writer";
+
+export type MoveResult = {movedFilesRelativePaths: string[], changesMade: boolean}
 
 export async function moveGames(data: ProcessResult) {
     /* Create output folder if needed
@@ -18,18 +21,25 @@ export async function moveGames(data: ProcessResult) {
     mkdirIfNotExists(data.outputAbsoultePath);
     
     const bestGames = buildBestGamesJson(data);
-   
-
+    let progressCounter = 0;+
+    console.log(`Moving ${data.platform}. ${bestGames.length} files.`)
+    console.log(`Processed 0/${bestGames.length} `)
     for(const game of bestGames) {
+        let results: MoveResult;
         if(data.unzip) {
             const createGameFolder = data.unzip === 'sub-folder'
-            unzipGameToOutputLocation(game, data.outputAbsoultePath, createGameFolder)
-            if(data.generateMultiDiscXML === 'BizhawkXML') {
-                // TODO: Generate XML file
-            }
+            results = await unzipGameToOutputLocation(game, data.outputAbsoultePath, createGameFolder)
         }
         else {
-            copyGameToOutputLocation(game, data.outputAbsoultePath);
+            results = await copyGameToOutputLocation(game, data.outputAbsoultePath);
+        }
+
+        if(results.changesMade && data.generateMultiDiscFile === 'BizhawkXML') {
+            writeBizhawkXmlFile(results.movedFilesRelativePaths, data.outputAbsoultePath, game.title, data.platform);
+        }
+
+        if(++progressCounter % 10 === 0) {
+            console.log(`Processed ${progressCounter}/${bestGames.length} `)
         }
     }
     // TODO: Write "best.json" with info from what we copied or extracted
@@ -66,7 +76,7 @@ function buildBestGamesJson(data: ProcessResult) {
  * @param outputDirectoryPath 
  * @returns Relative file path to all concerned game files (copied or already preset), and true if any files were copied
  */
-export async function copyGameToOutputLocation(game: GameWriteData, outputDirectoryPath: string) {
+export async function copyGameToOutputLocation(game: GameWriteData, outputDirectoryPath: string): Promise<MoveResult> {
     const promises = new Array<Promise<void>>();
     const gameFiles = new Array<string>();
     for(const src of game.fileAbsolutePaths) {
@@ -82,7 +92,7 @@ export async function copyGameToOutputLocation(game: GameWriteData, outputDirect
     if(promises.length > 0) {
         await Promise.all(promises);
     }
-    return {gameFiles, changesMade: promises.length > 0};
+    return {movedFilesRelativePaths: gameFiles, changesMade: promises.length > 0};
 }
 
 /** Tries to unzip a game to an output directory. If a file with the same name already exists at the output
@@ -93,7 +103,7 @@ export async function copyGameToOutputLocation(game: GameWriteData, outputDirect
  * @param createGameFolder      Shall the function create a folder named after the zip file and unzip to that
  * @returns Relative file path to all concerned game files (unzipped or already preset), and true if any files were unzipped
  */
-export async function unzipGameToOutputLocation(game: GameWriteData, outputDirectoryPath: string, createGameFolder = false) {
+export async function unzipGameToOutputLocation(game: GameWriteData, outputDirectoryPath: string, createGameFolder = false): Promise<MoveResult> {
     const gameFiles = new Array<string>();
     let changesMade = false;
     for(const src of game.fileAbsolutePaths) {
@@ -113,7 +123,9 @@ export async function unzipGameToOutputLocation(game: GameWriteData, outputDirec
                     mkdirIfNotExists(path, false)
                 }
                 else {
-                    await zip.extract(entry, path);
+                    // await zip.extract(entry, path);
+                    closeSync( openSync( path, 'w' ) )
+                    
                 }
                 changesMade = true;
             }
@@ -126,5 +138,5 @@ export async function unzipGameToOutputLocation(game: GameWriteData, outputDirec
         }
         await zip.close()
     }
-    return {gameFiles, changesMade};
+    return {movedFilesRelativePaths: gameFiles, changesMade};
 }

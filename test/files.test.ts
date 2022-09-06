@@ -490,6 +490,24 @@ describe("Test extractDiscInfo", () => {
             }
         }
     })
+    it("can handle 'A Ressha de Ikou 4 - Evolution (Japan)' and 'A Ressha de Ikou 4 - Evolution Global (Japan) (En,Ja)'", () => {
+        const games = groupByTitle(
+            "A Ressha de Ikou 4 - Evolution (Japan).zip",
+            "A Ressha de Ikou 4 - Evolution Global (Japan) (En,Ja).zip",
+        ).map(extractDiscInfo);
+        expect(games.length).toBe(2);
+
+        expect(games[0].title).toBe("aresshadeikouivevolution")
+        expect(games[1].title).toBe("aresshadeikouivevolutionglobal")
+    })
+    it("can handle '...Iru!'", () => {
+        const games = groupByTitle(
+            "...Iru!.zip",
+        ).map(extractDiscInfo);
+        expect(games.length).toBe(1);
+
+        expect(games[0].title).toBe("iru")
+    })
 })
 
 describe("Test skipTags", () => {

@@ -1,6 +1,0 @@
-platform: 'PC FX'
-output: 'NEC - PC Engine SuperGrafx [tg16]'
-input:
-    - 'NEC - PC Engine CD & TurboGrafx CD'
-unzip: sub-folder
-generateMultiDiscFile: 'BizhawkXML'

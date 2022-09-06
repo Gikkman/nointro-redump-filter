@@ -13,7 +13,7 @@ type Collection = {
     clonelists?: string[],
     inputDirectoryRootOverride?: string,
     skipFilePrefixes?: string[],
-    generateMultiDiscXML?: "BizhawkXML",
+    generateMultiDiscFile?: "BizhawkXML",
 }
 
 type Collections = {

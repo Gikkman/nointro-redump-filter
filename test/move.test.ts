@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, fstat, readFileSync, rmSync } from "fs";
+import { existsSync, readFileSync, rmSync } from "fs";
 import path from "path";
 import { mkdirIfNotExists } from "../src/files";
 import { copyGameToOutputLocation, unzipGameToOutputLocation } from "../src/move";
@@ -58,8 +58,8 @@ describe("Test move file", () => {
             const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), fileAbsolutePaths: input };
             const result = await copyGameToOutputLocation(gwd, newDir);
             expect(result.changesMade).toBeTrue();
-            expect(result.gameFiles).toContain("game-a.zip");
-            expect(result.gameFiles).toContain("game-b.zip");
+            expect(result.movedFilesRelativePaths).toContain("game-a.zip");
+            expect(result.movedFilesRelativePaths).toContain("game-b.zip");
             
             for(let i = 0; i < expected.length; i++) {
                 expect(existsSync(expected[i])).withContext(`Expected ${input[i]} to be copied to ${newDir}`).toBeTrue()
@@ -74,8 +74,8 @@ describe("Test move file", () => {
         const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), fileAbsolutePaths: input };
         const result = await copyGameToOutputLocation(gwd, inputDir);
         expect(result.changesMade).toBeFalse();
-        expect(result.gameFiles).toContain("game-a.zip");
-        expect(result.gameFiles).toContain("game-b.zip");
+        expect(result.movedFilesRelativePaths).toContain("game-a.zip");
+        expect(result.movedFilesRelativePaths).toContain("game-b.zip");
     })
 
     // Post conditions
@@ -93,7 +93,7 @@ describe("Test unzip file", () => {
 
      // Pre conditions
      if(existsSync(newDir)) {
-        throw new Error("Error. Can't run tests for 'move fiel'. Dir doesn't exists: " + newDir)
+        throw new Error("Error. Can't run tests for 'move file'. Dir doesn't exists: " + newDir)
     }
 
     it("should unzip file if no file existed", async () => {
@@ -105,8 +105,8 @@ describe("Test unzip file", () => {
             const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), fileAbsolutePaths: input };
             const result = await unzipGameToOutputLocation(gwd, newDir);
             expect(result.changesMade).toBeTrue();
-            expect(result.gameFiles).toContain("game-a.txt");
-            expect(result.gameFiles).toContain("game-b.txt");
+            expect(result.movedFilesRelativePaths).toContain("game-a.txt");
+            expect(result.movedFilesRelativePaths).toContain("game-b.txt");
             for(let i = 0; i < expected.length; i++) {
                 expect(existsSync(expected[i])).withContext(`Expected ${input[i]} to be unzipped to ${newDir}`).toBeTrue()
             }
@@ -127,8 +127,8 @@ describe("Test unzip file", () => {
             //2nd time should give false, since everything already existed, but we should still get the files we unzipped
             const result = await unzipGameToOutputLocation(gwd, newDir);
             expect(result.changesMade).toBeFalse();
-            expect(result.gameFiles).toContain("game-a.txt");
-            expect(result.gameFiles).toContain("game-b.txt");
+            expect(result.movedFilesRelativePaths).toContain("game-a.txt");
+            expect(result.movedFilesRelativePaths).toContain("game-b.txt");
         } finally {
             rmSync(newDir, {recursive: true, force: true})
         }
@@ -142,8 +142,8 @@ describe("Test unzip file", () => {
             const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), fileAbsolutePaths: input };
             const result = await unzipGameToOutputLocation(gwd, newDir);
             expect(result.changesMade).toBeTrue();
-            expect(result.gameFiles).toContain("outer.txt");
-            expect(result.gameFiles).toContain(path.join("nested","inner.txt"));
+            expect(result.movedFilesRelativePaths).toContain("outer.txt");
+            expect(result.movedFilesRelativePaths).toContain(path.join("nested","inner.txt"));
             expect(existsSync(path.join(newDir, "outer.txt"))).withContext("Expected outer.txt to be extracted").toBeTrue();
             expect(existsSync(path.join(newDir, "nested", "inner.txt"))).withContext("Expected inner.txt to be extracted").toBeTrue();
         } finally {
@@ -160,8 +160,8 @@ describe("Test unzip file", () => {
             const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), fileAbsolutePaths: input };
             const result = await unzipGameToOutputLocation(gwd, newDir, true);
             expect(result.changesMade).toBeTrue();
-            expect(result.gameFiles).toContain( path.join("game-a","game-a.txt"));
-            expect(result.gameFiles).toContain( path.join("game-b","game-b.txt"));
+            expect(result.movedFilesRelativePaths).toContain( path.join("game-a","game-a.txt"));
+            expect(result.movedFilesRelativePaths).toContain( path.join("game-b","game-b.txt"));
             
             for(let i = 0; i < expected.length; i++) {
                 expect(existsSync(expected[i])).withContext(`Expected ${input[i]} to be unzipped to ${newDir}`).toBeTrue()

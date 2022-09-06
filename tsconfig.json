@@ -4,6 +4,7 @@
         
         "incremental": true,
         "downlevelIteration": true,
+        "target": "es2021",
 
         "moduleResolution": "node",
         "esModuleInterop": true,

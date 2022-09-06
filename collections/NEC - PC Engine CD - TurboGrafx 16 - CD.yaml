@@ -5,3 +5,4 @@ input:
 clonelists:
     - 'NEC - PC Engine CD & TurboGrafx CD.json'
 unzip: sub-folder
+generateMultiDiscFile: BizhawkXML
