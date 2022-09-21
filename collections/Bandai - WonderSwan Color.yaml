@@ -1,0 +1,6 @@
+platform: 'WonderSwan Color'
+output: 'Bandai - WonderSwan Color [wsc]'
+input:
+    - 'No-Intro/Bandai - WonderSwan Color'
+clonelists:
+    - 'Bandai - WonderSwan Color.json'

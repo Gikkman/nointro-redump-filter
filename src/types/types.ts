@@ -5,6 +5,7 @@ declare module NodeJS {
 }
 declare const DryRun: boolean;
 
+/** @see {isCollection} ts-auto-guard:type-guard */
 type Collection = {
     platform: string,
     output: string,
@@ -22,7 +23,7 @@ type Collections = {
     skipFileExtensions?: string[],
     skipFileTags?: string[],
     skipFilePrefixes?: string[]
-    collections: string[],
+    collectionsDirectory: string,
 }
 
 type CollectionRules = {

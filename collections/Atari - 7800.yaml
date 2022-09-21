@@ -1,0 +1,6 @@
+platform: '7800'
+output: 'Atari - 7800 [a78]'
+input:
+    - 'No-Intro/Atari - 7800'
+clonelists:
+    - 'Atari - 7800.json'

@@ -1,0 +1,6 @@
+platform: 'Lynx'
+output: 'Atari - Lynx [lynx]'
+input:
+    - 'No-Intro/Atari - Lynx'
+clonelists:
+    - 'Atari - Lynx.json'

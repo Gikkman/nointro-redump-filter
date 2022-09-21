@@ -1,5 +1,5 @@
 platform: 'TurboGrafx 16 CD'
-output: 'NEC - PC Engine - TubroGrafx 16 - CD [tgcd]'
+output: 'NEC - PC Engine CD & TurboGrafx CD [tgcd]'
 input:
     - 'NEC - PC Engine CD & TurboGrafx CD'
 clonelists:

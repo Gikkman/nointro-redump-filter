@@ -1,5 +1,5 @@
 import path from "path";
-import { mkdirIfNotExists, verifyExists } from "./files";
+import { mkdirIfNotExists, readCollectionFiles, verifyExists } from "./files";
 import { clonelistDirExists, loadYaml } from "./util";
 import { ProcessResult, run, setup, SetupData } from "./work";
 import { exit } from "process";
@@ -13,7 +13,7 @@ if( !clonelistDirExists() ) {
 
 const col = loadYaml("collections.yaml") as Collections;
 const inputBaseDirectory = path.resolve(col.inputRootDirectory);
-const collectionsDirectory = path.resolve("collections");
+const collectionsDirectory = path.resolve(col.collectionsDirectory);
 const outputBaseDirectory = path.resolve(col.outputRootDirectory);
 const skipFileExtensions = col.skipFileExtensions ?? [];
 const skipFileTags = col.skipFileTags ?? [];
@@ -22,9 +22,9 @@ verifyExists(inputBaseDirectory);
 verifyExists(collectionsDirectory);
 mkdirIfNotExists(outputBaseDirectory)
 
-
+const collectionFiles = readCollectionFiles(collectionsDirectory);
 const collectionData: SetupData[] = [];
-for (const collection of col.collections) {
+for (const collection of collectionFiles) {
     console.log("Processing rom collection:", collection);
     const data = setup(inputBaseDirectory, outputBaseDirectory, skipFileExtensions, skipFileTags, skipFilePrefixes, collection);
     collectionData.push(data);

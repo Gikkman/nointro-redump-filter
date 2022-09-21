@@ -1,0 +1,8 @@
+platform: 'Sega CD'
+output: 'Sega - Mega CD & Sega CD [scd]'
+input:
+    - 'Sega - Mega CD & Sega CD'
+clonelists:
+    - 'Sega - Mega CD & Sega CD.json'
+unzip: sub-folder
+generateMultiDiscFile: 'BizhawkXML'

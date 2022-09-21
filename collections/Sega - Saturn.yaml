@@ -7,3 +7,5 @@ clonelists:
     - 'Sega - Saturn.json'
 unzip: sub-folder
 generateMultiDiscFile: 'BizhawkXML'
+skipFilePrefixes:
+  - "_Sega"

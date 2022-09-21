@@ -5,3 +5,6 @@ input:
     - 'Sega - Mega Drive [T-En] Collection'
 clonelists:
     - 'Sega - Mega Drive - Genesis.json'
+skipFilePrefixes:
+  - "go net"
+  - "meganet"

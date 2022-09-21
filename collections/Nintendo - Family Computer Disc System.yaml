@@ -1,0 +1,7 @@
+platform: 'Famicom Disc System'
+output: 'Nintendo - Family Computer Disc System [nes]'
+input:
+    - 'Nintendo - Famicom Disk System'
+    - 'Nintendo - Family Computer Disk System [T-En] Collection'
+clonelists:
+    - 'Nintendo - Family Computer Disk System (FDS).json'

@@ -1,0 +1,10 @@
+platform: 'Nintendo 64'
+output: 'Nintendo - Nintendo 64 [n64]'
+input:
+    - 'Nintendo - Nintendo 64 (BigEndian)'
+    - 'Nintendo - Nintendo 64 [T-En] Collection'
+clonelists:
+    - 'Nintendo - Nintendo 64.json'
+skipFilePrefixes:
+  - "gamebooster"
+  - "ique club"

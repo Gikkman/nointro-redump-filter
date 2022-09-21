@@ -6,8 +6,5 @@ input:
     - 'Nintendo - Famicom [Eng]'
     - 'Nintendo - Famicom [T-En] Collection'
     - 'Nintendo - NES - English Collection'
-    - 'Nintendo - Famicom Disk System'
-    - 'Nintendo - Family Computer Disk System [T-En] Collection'
 clonelists:
     - 'Nintendo - Nintendo Entertainment System.json'
-    - 'Nintendo - Family Computer Disk System (FDS).json'

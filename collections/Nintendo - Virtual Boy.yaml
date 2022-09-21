@@ -1,0 +1,6 @@
+platform: 'Virtual Boy'
+output: 'Nintendo - Virtual Boy [vb]'
+input:
+    - 'No-Intro/Nintendo - Virtual Boy'
+clonelists:
+    - 'Nintendo - Virtual Boy'

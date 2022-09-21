@@ -19,6 +19,7 @@ skipFilePrefixes:
     - '[bios]'
     - action replay
     - game genie
+    - gameshark
     - 2 game pack
     - 2 games in 1
     - 2 games in one
@@ -34,20 +35,4 @@ skipFilePrefixes:
     - 4 games in one
     - 4 in 1
     - 4-in-1
-collections:
-    - Nintendo - Nintendo Entertainment System.yaml
-    - Nintendo - Super Nintendo Entertainment System.yaml
-    - Nintendo - Game Boy.yaml
-    - Nintendo - Game Boy Color.yaml
-    - Nintendo - Game Boy Advance.yaml
-    - Sega - SG-1000.yaml
-    - Sega - Game Gear.yaml
-    - Sega - Master System - Mark III.yaml
-    - Sega - Mega Drive - Genesis.yaml
-    - Sega - Saturn.yaml
-    - SNK - Neo Geo Pocket.yaml
-    - SNK - Neo Geo Pocket Color.yaml
-    - NEC - PC Engine - TurboGrafx 16.yaml
-    - NEC - PC Engine CD - TurboGrafx 16 - CD.yaml
-    - NEC - PC FX.yaml
-    - Sony - Playstation.yaml
+collectionsDirectory: ./collections

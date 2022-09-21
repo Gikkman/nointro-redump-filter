@@ -1,0 +1,11 @@
+platform: '32X'
+output: 'Sega - 32X [32x]'
+input:
+    - 'Sega - 32X'
+clonelists:
+    - 'Sega - 32X.json'
+skipFilePrefixes:
+  - "32x sample"
+  - "golf magazine"
+  - "mars check"
+  - "mars sample"

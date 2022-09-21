@@ -123,8 +123,7 @@ export async function unzipGameToOutputLocation(game: GameWriteData, outputDirec
                     mkdirIfNotExists(path, false)
                 }
                 else {
-                    // await zip.extract(entry, path);
-                    closeSync( openSync( path, 'w' ) )
+                    await zip.extract(entry, path);
                     
                 }
                 changesMade = true;

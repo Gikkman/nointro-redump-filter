@@ -25,13 +25,11 @@ properties:
         type: array
         items:
             type: string
-    collections:
-        description: "Name of collection files to load (from the 'collections' folder)"
-        type: array
-        items:
-            type: string
+    collectionsDirectory:
+        description: "Name of the folder where we can find the collections (has to be .yaml files)"
+        type: string
 required:
     - inputRootDirectory
     - outputRootDirectory
-    - collections
+    - collectionsDirectory
 additionalProperties: false

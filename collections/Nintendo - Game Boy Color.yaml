@@ -5,3 +5,5 @@ input:
     - 'Nintendo - Game Boy Color [T-En] Collection'
 clonelists:
     - 'Nintendo - Game Boy Color.json'
+skipFilePrefixes:
+  - "Net de Get"

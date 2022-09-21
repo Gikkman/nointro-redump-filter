@@ -1,0 +1,6 @@
+platform: 'WonderSwan'
+output: 'Bandai - WonderSwan [ws]'
+input:
+    - 'No-Intro/Bandai - WonderSwan'
+clonelists:
+    - 'Bandai - WonderSwan.json'

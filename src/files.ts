@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { isCollection } from "./types/types.guard";
 import { recursiveIntersection, titlefyString } from "./util";
 
 export function verifyExists(path: fs.PathLike) {
@@ -26,6 +27,17 @@ export function mkdirIfNotExists(path: fs.PathLike, printLogs: boolean = true): 
     fs.mkdirSync(path, {recursive: true});
     if(printLogs) console.log("Directory created:", path)
     return;
+}
+
+export function readCollectionFiles(dirPath: string) {
+    const files = new Array<string>();
+    const dirents = fs.readdirSync(dirPath, {withFileTypes: true});
+    for(const dirent of dirents) {
+        if(dirent.isFile() && dirent.name.endsWith(".yaml")) {
+            files.push(dirent.name)
+        }
+    }
+    return files;
 }
 
 export function listFilesFlat(skipFileExtensions: Set<string>, ...dirPaths: string[]): GameFile[] {
