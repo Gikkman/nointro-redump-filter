@@ -70,7 +70,7 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
     ///////////////////////////////////////////////////////////////////////
     // Find all files
     console.log("Scanning input directories for platform", data.platform);
-    const files: GameFile[] = listFilesFlat(data.skipFileExtensions, ...data.inputAbsolutePaths);
+    const files: GameFile[] = listFilesFlat(".", data.skipFileExtensions, ...data.inputAbsolutePaths);
     console.log("Scanning done. Files found:", files.length);
 
     ///////////////////////////////////////////////////////////////////////

@@ -78,6 +78,27 @@ describe("Test move file", () => {
         expect(result.movedFilesRelativePaths).toContain("game-b.zip");
     })
 
+//    it("should retain folder structure with move", async () => {
+//        try {
+//            mkdirIfNotExists(newDir, LOGGING);
+//
+//            const input = [path.join(inputDir, "inner-1", "game-1a.zip"), path.join(inputDir, "inner-1", "inner-1-1", "game-1-1a.rar")];
+//            const expected = [path.join(newDir, "inner-1", "game-1a.zip"), path.join(newDir, "inner-1", "inner-1-1", "game-1-1a.rar")];
+//            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), fileAbsolutePaths: input };
+//            const result = await copyGameToOutputLocation(gwd, newDir);
+//
+//            expect(result.changesMade).toBeTrue();
+//            expect(result.movedFilesRelativePaths).toContain(path.join("inner-1", "game-1a.zip"));
+//            expect(result.movedFilesRelativePaths).toContain(path.join("inner-1", "inner-1-1", "game-1-1a.rar"));
+//            
+//            for(let i = 0; i < expected.length; i++) {
+//                expect(existsSync(expected[i])).withContext(`Expected ${input[i]} to be copied to ${newDir}`).toBeTrue()
+//            }
+//        } finally {
+//            rmSync(newDir, {recursive: true, force: true})
+//        }
+//    })
+
     // Post conditions
     if(existsSync(newDir)) {
         throw new Error("Error. A test did not clean up dir: " + newDir)

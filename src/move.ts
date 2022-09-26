@@ -1,7 +1,7 @@
 import { closeSync, constants, existsSync, openSync } from "fs";
 import { copyFile } from "fs/promises";
 import StreamZip from "node-stream-zip";
-import { join, basename } from "path";
+import path, { join, basename } from "path";
 import { mkdirIfNotExists } from "./files";
 import { writeJsonToDisc } from "./util";
 import { ProcessResult } from "./work";
@@ -54,10 +54,10 @@ function buildBestGamesJson(data: ProcessResult) {
         const fileAbsolutePaths = new Array<string>();
         const bestVersion = game.bestVersion;
         if(bestVersion.isMultiFile) {
-            fileAbsolutePaths.push( ...bestVersion.files.map(f => join(f.dir, f.file)) );
+            fileAbsolutePaths.push( ...bestVersion.files.map(f => join(f.dirAbsolutePath, f.file)) );
         }
         else {
-            fileAbsolutePaths.push( join(bestVersion.dir, bestVersion.file) );
+            fileAbsolutePaths.push( join(bestVersion.dirAbsolutePath, bestVersion.file) );
         }
         best.push({
             title: bestVersion.gameTitle,

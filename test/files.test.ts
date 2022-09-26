@@ -2,7 +2,7 @@ import path from "path"
 import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, clearsTagRequirements, clearsTitlePrefixRequirements, extractTitle } from "../src/files";
 
 function toGameFile(...str: string[]): FileInfo[] {
-    const g = str.map(g => ({file:g, dir: ""}))
+    const g = str.map(g => ({file:g, dirAbsolutePath: "", dirRelativePath: ""}))
                  .map(g => ({...extractTags(g),...g}))
                  .map(g => ({...extractRegionInfo(g), ...g}))
                  .map(g => ({ gameTitle: extractTitle(g, g), ...g}))
@@ -17,30 +17,61 @@ function groupByTitle(...str: string[]): TitleGroup[] {
 describe("Test listFilesFlat", () => {
     it("can handle nested directories", () => {
         const testInputPath = path.join(__dirname, "test-input");
-        const testInputFileList = listFilesFlat(new Set(), testInputPath);
+        const testInputFileList = listFilesFlat("",new Set(), testInputPath);
         expect(testInputFileList.length).toBe(10)
     });
     it("can handle flat directories", () => {
         const testInputPath = path.join(__dirname, "test-input", "inner-2");
-        const testInputFileList = listFilesFlat(new Set(),testInputPath);
+        const testInputFileList = listFilesFlat("", new Set(),testInputPath);
         expect(testInputFileList.length).toBe(2)
     });
     it("can give empty list on missing directory", () => {
         const testInputPath = path.join(__dirname, "test-input", "inner-3");
-        const testInputFileList = listFilesFlat(new Set(),testInputPath);
+        const testInputFileList = listFilesFlat("", new Set(),testInputPath);
         expect(testInputFileList.length).toBe(0)
     });
     it("skips file extensions as requested", () => {
         const testInputPath = path.join(__dirname, "test-input", "inner-1");
-        const testInputFileList = listFilesFlat(new Set(["rar", "tar"]),testInputPath);
+        const testInputFileList = listFilesFlat("", new Set(["rar", "tar"]),testInputPath);
         expect(testInputFileList.length).toBe(3)
+    })
+    it("renders correct relative paths", () => {
+        const testInputPath = path.join(__dirname, "test-input");
+        const testInputFileList = listFilesFlat("", new Set(), testInputPath);
+        const relativeFilePaths = testInputFileList.map(f => path.join(f.dirRelativePath, f.file));
+        expect(relativeFilePaths).toContain(path.join(".", "game-a.zip"))
+        expect(relativeFilePaths).toContain(path.join(".", "game-b.zip"))
+        expect(relativeFilePaths).toContain(path.join(".", "nested.zip"))
+        expect(relativeFilePaths).toContain(path.join(".", "inner-1", "game-1a.zip"))
+        expect(relativeFilePaths).toContain(path.join(".", "inner-1", "game-1b.txt"))
+        expect(relativeFilePaths).toContain(path.join(".", "inner-1", "inner-1-1", "game-1-1a.rar"))
+        expect(relativeFilePaths).toContain(path.join(".", "inner-1", "inner-1-1", "game-1-1b.zip"))
+        expect(relativeFilePaths).toContain(path.join(".", "inner-1", "inner-1-2", "game-1-2.tar"))
+        expect(relativeFilePaths).toContain(path.join(".", "inner-2", "game-2a.zip"))
+        expect(relativeFilePaths).toContain(path.join(".", "inner-2", "game-2b.zip"))
+    })
+    it("renders correct absolute paths", () => {
+        const testInputPath = path.join(__dirname, "test-input");
+        const testInputFileList = listFilesFlat("", new Set(), testInputPath);
+        const absoluteFilePaths = testInputFileList.map(f => path.join(f.dirAbsolutePath, f.file));
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "game-a.zip"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "game-b.zip"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "nested.zip"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "inner-1", "game-1a.zip"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "inner-1", "game-1b.txt"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "inner-1", "inner-1-1", "game-1-1a.rar"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "inner-1", "inner-1-1", "game-1-1b.zip"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "inner-1", "inner-1-2", "game-1-2.tar"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "inner-2", "game-2a.zip"))
+        expect(absoluteFilePaths).toContain(path.join(testInputPath, "inner-2", "game-2b.zip"))
+        
     })
 })
 
 describe("Test extractTags", () => {
     it("can handle single region", () => {
         const file = "Barbie - Ocean Discovery (USA).zip";
-        const input: GameFile = {file, dir: ""}
+        const input: GameFile = {file, dirAbsolutePath: "", dirRelativePath: ""}
         const output = extractTags(input);
         expect(output.tags).toContain("USA");
         expect(output.tags.size).toBe(1);
@@ -48,7 +79,7 @@ describe("Test extractTags", () => {
     })
     it("can handle multiple regions", () => {
         const file = "Asteroids (USA,Europe).zip";
-        const input: GameFile = {file, dir: ""}
+        const input: GameFile = {file, dirAbsolutePath: "", dirRelativePath: ""}
         const output = extractTags(input);
         expect(output.tags).toContain("Europe");
         expect(output.tags).toContain("USA");
@@ -57,7 +88,7 @@ describe("Test extractTags", () => {
     })
     it("can handle multiple regions with space in between", () => {
         const file = "Asteroids (USA, Europe).zip";
-        const input: GameFile = {file, dir: ""}
+        const input: GameFile = {file, dirAbsolutePath: "", dirRelativePath: ""}
         const output = extractTags(input);
         expect(output.tags).toContain("Europe");
         expect(output.tags).toContain("USA");
@@ -66,7 +97,7 @@ describe("Test extractTags", () => {
     })
     it("can handle paranthesis before region", () => {
         const file = "6-in-1 (Micro Genius) (Asia).zip";
-        const input: GameFile = {file, dir: ""}
+        const input: GameFile = {file, dirAbsolutePath: "", dirRelativePath: ""}
         const output = extractTags(input);
         expect(output.tags).toContain("Asia");
         expect(output.tags.size).toBe(1);
@@ -74,7 +105,7 @@ describe("Test extractTags", () => {
     })
     it("can handle tags in trailing groups", () => {
         const file = "Animaniacs (The Series) (USA) (En,Es) (SGB Enhanced).zip";
-        const input: GameFile = {file, dir: ""}
+        const input: GameFile = {file, dirAbsolutePath: "", dirRelativePath: ""}
         const output = extractTags(input);
         expect(output.tags).toContain("USA");
         expect(output.tags).toContain("SGB Enhanced");
@@ -85,7 +116,7 @@ describe("Test extractTags", () => {
     })
     it("can handle tags in brackets", () => {
         const file = "King of Kings (Japan) [T-En by MrRichard999 v0.99b].zip";
-        const input: GameFile = {file, dir: ""}
+        const input: GameFile = {file, dirAbsolutePath: "", dirRelativePath: ""}
         const output = extractTags(input);
         expect(output.tags).toContain("Japan");
         expect(output.tags).toContain("T-En by MrRichard999 v0.99b");
@@ -94,7 +125,7 @@ describe("Test extractTags", () => {
     })
     it("can handle no region info", () => {
         const file = "Batman [T-En by Gikkman v1.01].zip";
-        const input: GameFile = {file, dir: ""}
+        const input: GameFile = {file, dirAbsolutePath: "", dirRelativePath: ""}
         const output = extractTags(input);
         expect(output.tags).toContain("Unknown");
         expect(output.tags).toContain("T-En by Gikkman v1.01");
@@ -103,7 +134,7 @@ describe("Test extractTags", () => {
     })
     it("can handle no tags at all", () => {
         const file = "Batman.zip";
-        const input: GameFile = {file, dir: ""}
+        const input: GameFile = {file, dirAbsolutePath: "", dirRelativePath: ""}
         const output = extractTags(input);
         expect(output.tags).toContain("Unknown");
         expect(output.tags.size).toBe(1);

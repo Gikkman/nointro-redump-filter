@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { isCollection } from "./types/types.guard";
 import { recursiveIntersection, titlefyString } from "./util";
 
 export function verifyExists(path: fs.PathLike) {
@@ -40,7 +39,7 @@ export function readCollectionFiles(dirPath: string) {
     return files;
 }
 
-export function listFilesFlat(skipFileExtensions: Set<string>, ...dirPaths: string[]): GameFile[] {
+export function listFilesFlat(dirRelativePath: string, skipFileExtensions: Set<string>, ...dirPaths: string[]): GameFile[] {
     const files: GameFile[] = [];
     for(const dirPath of dirPaths) {
         if(!fs.existsSync(dirPath)) continue;
@@ -53,11 +52,12 @@ export function listFilesFlat(skipFileExtensions: Set<string>, ...dirPaths: stri
                 const extension = name.slice( name.lastIndexOf(".") + 1);
                 if(skipFileExtensions.has(extension))
                     continue;
-                files.push( {dir: dirPath, file: dirent.name} )
+                files.push( {dirAbsolutePath: dirPath, dirRelativePath, file: dirent.name} )
             }
             else if(dirent.isDirectory()) {
                 const childDirPath = path.join(dirPath, dirent.name);
-                const childFiles = listFilesFlat(skipFileExtensions, childDirPath );
+                const childDirRelative = path.join(dirRelativePath, dirent.name)
+                const childFiles = listFilesFlat(childDirRelative, skipFileExtensions, childDirPath );
                 files.push(...childFiles);
             }
         }

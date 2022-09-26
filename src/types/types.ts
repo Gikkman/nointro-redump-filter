@@ -33,7 +33,8 @@ type CollectionRules = {
 }
 
 type GameFile = {
-    dir: string,
+    dirAbsolutePath: string,
+    dirRelativePath: string,
     file: string,
 };
 type Tags = {
