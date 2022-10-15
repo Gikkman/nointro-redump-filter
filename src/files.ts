@@ -265,7 +265,7 @@ function extractLanguageTags(tags: Tags, reg: Set<string>): Set<string> {
     else if(reg.has("Sweden"))
         languages.add("Sv")
     else if(reg.has("Unknown") && languages.size == 0)
-        languages.add("??")
+        languages.add("En") // Default to 'En' if we can't find anything
     return languages;
 }
 

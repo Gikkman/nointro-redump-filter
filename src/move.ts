@@ -8,7 +8,7 @@ import { ProcessResult } from "./work";
 import { writeBizhawkXmlFile } from "./xml-writer";
 
 export type MoveResult = {movedFilesRelativePaths: string[], changesMade: boolean}
-export type BestWriteData = {files: string[], title: string, aliases?: string[], languages: Set<string>}
+export type BestWriteData = {files: string[], title: string, aliases?: string[], languages: string[]}
 
 export async function moveGames(data: ProcessResult) {
     /* Create output folder if needed
@@ -39,10 +39,10 @@ export async function moveGames(data: ProcessResult) {
         let writeData: BestWriteData;
         if(moveResult.changesMade && data.generateMultiDiscFile === 'BizhawkXML') {
             const fileName = await writeBizhawkXmlFile(moveResult.movedFilesRelativePaths, data.outputAbsoultePath, game.title, data.platform);
-            writeData = {title: game.title, aliases: game.aliases, languages: game.languages, files: [fileName]};
+            writeData = {title: game.title, aliases: game.aliases, languages: [...game.languages], files: [fileName]};
         }
         else {
-            writeData = {title: game.title, aliases: game.aliases, languages: game.languages, files: moveResult.movedFilesRelativePaths};
+            writeData = {title: game.title, aliases: game.aliases, languages: [...game.languages], files: moveResult.movedFilesRelativePaths};
         }
         finalOutput.push(writeData);
 

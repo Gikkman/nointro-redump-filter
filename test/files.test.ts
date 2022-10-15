@@ -252,7 +252,7 @@ describe("Test extractRegionInfo", () => {
         expect(file.regions.size).toBe(1);
         expect(file.regions).toContain("Unknown");
         expect(file.languages.size).toBe(1);
-        expect(file.languages).toContain("??")
+        expect(file.languages).toContain("En")  // We default to language 'En' when we can't find anything
         expect(file.isTranslated).toBeFalse()
     })
 })
