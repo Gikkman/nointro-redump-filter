@@ -1,6 +1,6 @@
 1. ~~Create output directory if needed~~
-1. Copy files
-1. Unzip files if needed
+1. ~~Copy files~~
+1. ~~Unzip files if needed~~
 1. ~~Write test for copy files~~
 1. ~~Write test for unzip files~~
 1. ~~Use yaml instead of json~~

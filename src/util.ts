@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFile } from "fs";
+import { existsSync, readFileSync, writeFile, writeFileSync } from "fs";
 import { join, resolve } from "path";
 import * as yaml from "yaml";
 
@@ -144,5 +144,5 @@ function numberToRoman(s: string) {
 }
 
 export function writeJsonToDisc(json: object, filepath: string, filename: string) {
-    writeFile( join(filepath, filename), JSON.stringify(json, SetToJSON, 2), {encoding: 'utf8'}, () => {} );
+    writeFileSync( join(filepath, filename), JSON.stringify(json, SetToJSON, 2));
 }

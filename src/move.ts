@@ -8,6 +8,7 @@ import { ProcessResult } from "./work";
 import { writeBizhawkXmlFile } from "./xml-writer";
 
 export type MoveResult = {movedFilesRelativePaths: string[], changesMade: boolean}
+export type BestWriteData = {files: string[], title: string, aliases?: string[], languages: Set<string>}
 
 export async function moveGames(data: ProcessResult) {
     /* Create output folder if needed
@@ -21,29 +22,36 @@ export async function moveGames(data: ProcessResult) {
     mkdirIfNotExists(data.outputAbsoultePath);
     
     const bestGames = buildBestGamesJson(data);
+    const finalOutput: BestWriteData[] = new Array();
     let progressCounter = 0;+
     console.log(`Moving ${data.platform}. ${bestGames.length} files.`)
     console.log(`Processed 0/${bestGames.length} `)
     for(const game of bestGames) {
-        let results: MoveResult;
+        let moveResult: MoveResult;
         if(data.unzip) {
             const createGameFolder = data.unzip === 'sub-folder'
-            results = await unzipGameToOutputLocation(game, data.outputAbsoultePath, createGameFolder)
+            moveResult = await unzipGameToOutputLocation(game, data.outputAbsoultePath, createGameFolder)
         }
         else {
-            results = await copyGameToOutputLocation(game, data.outputAbsoultePath);
+            moveResult = await copyGameToOutputLocation(game, data.outputAbsoultePath);
         }
-
-        if(results.changesMade && data.generateMultiDiscFile === 'BizhawkXML') {
-            writeBizhawkXmlFile(results.movedFilesRelativePaths, data.outputAbsoultePath, game.title, data.platform);
+        
+        let writeData: BestWriteData;
+        if(moveResult.changesMade && data.generateMultiDiscFile === 'BizhawkXML') {
+            const fileName = await writeBizhawkXmlFile(moveResult.movedFilesRelativePaths, data.outputAbsoultePath, game.title, data.platform);
+            writeData = {title: game.title, aliases: game.aliases, languages: game.languages, files: [fileName]};
         }
+        else {
+            writeData = {title: game.title, aliases: game.aliases, languages: game.languages, files: moveResult.movedFilesRelativePaths};
+        }
+        finalOutput.push(writeData);
 
         if(++progressCounter % 10 === 0) {
             console.log(`Processed ${progressCounter}/${bestGames.length} `)
         }
     }
     // TODO: Write "best.json" with info from what we copied or extracted
-    writeJsonToDisc(bestGames, data.outputAbsoultePath, "best.json")
+    writeJsonToDisc(finalOutput, data.outputAbsoultePath, "best.json")
 }
 
 function buildBestGamesJson(data: ProcessResult) {

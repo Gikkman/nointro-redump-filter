@@ -35,8 +35,10 @@ export async function writeBizhawkXmlFile(files: string[], xmlWriteAbsolutePath:
     const xmlContent = FileTemplate.replace("#FILES_LIST_KEY#", filesXmlList)
                                     .replace("#NAME_KEY#", xmlEscape(gameName))
                                     .replace("#SYSTEM_KEY#", xmlEscape(bizhawkSystemKey));
-    const xmlFileName = path.join(xmlWriteAbsolutePath, gameName) + ".xml"
-    return writeFileAsync(xmlFileName, xmlContent);
+    const xmlFileName = gameName + ".xml"
+    const xmlFilePath = path.join(xmlWriteAbsolutePath, xmlFileName)
+    await writeFileAsync(xmlFilePath, xmlContent);
+    return xmlFileName;
 }
 
 function xmlEscape(str: string) {
