@@ -78,5 +78,6 @@ type GameWriteData = {
     title: string,
     aliases?: string[],
     languages: Set<string>,
-    fileAbsolutePaths: string[],
+    readAbsolutePaths: string[],
+    writeRelativePath: string,
 };

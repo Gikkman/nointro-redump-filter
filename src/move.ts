@@ -1,7 +1,7 @@
 import { closeSync, constants, existsSync, openSync } from "fs";
 import { copyFile } from "fs/promises";
 import StreamZip from "node-stream-zip";
-import path, { join, basename } from "path";
+import path, { join, basename, resolve } from "path";
 import { mkdirIfNotExists } from "./files";
 import { writeJsonToDisc } from "./util";
 import { ProcessResult } from "./work";
@@ -53,17 +53,21 @@ function buildBestGamesJson(data: ProcessResult) {
     for(const game of data.games) {
         const fileAbsolutePaths = new Array<string>();
         const bestVersion = game.bestVersion;
+        let shortestCommonRelativePath: string = "";
         if(bestVersion.isMultiFile) {
             fileAbsolutePaths.push( ...bestVersion.files.map(f => join(f.dirAbsolutePath, f.file)) );
+            shortestCommonRelativePath = bestVersion.files.map(f => f.dirRelativePath).reduce( (prev, curr) => prev.length <= curr.length ? prev : curr)
         }
         else {
             fileAbsolutePaths.push( join(bestVersion.dirAbsolutePath, bestVersion.file) );
+            shortestCommonRelativePath = bestVersion.dirRelativePath
         }
         best.push({
             title: bestVersion.gameTitle,
             aliases: data.collectionRules.englishTitleToForeignTitles.get(bestVersion.gameTitle),
             languages: bestVersion.languages,
-            fileAbsolutePaths
+            readAbsolutePaths: fileAbsolutePaths,
+            writeRelativePath: shortestCommonRelativePath
         })
     }
     return best;
@@ -79,14 +83,17 @@ function buildBestGamesJson(data: ProcessResult) {
 export async function copyGameToOutputLocation(game: GameWriteData, outputDirectoryPath: string): Promise<MoveResult> {
     const promises = new Array<Promise<void>>();
     const gameFiles = new Array<string>();
-    for(const src of game.fileAbsolutePaths) {
+    for(const src of game.readAbsolutePaths) {
         const filename = basename(src)
-        const dest = join(outputDirectoryPath, filename);
-        if (!existsSync(dest)) {
-            const cf = copyFile(src, dest, constants.COPYFILE_EXCL)
+        const destDir = join(outputDirectoryPath, game.writeRelativePath);
+        const destFile = join(destDir, filename);
+        if (!existsSync(destFile)) {
+            if(!existsSync(destDir))
+                mkdirIfNotExists(destDir, false)
+            const cf = copyFile(src, destFile, constants.COPYFILE_EXCL)
             promises.push(cf);
         }
-        gameFiles.push(filename);
+        gameFiles.push( join(game.writeRelativePath, filename) );
     }
 
     if(promises.length > 0) {
@@ -106,7 +113,7 @@ export async function copyGameToOutputLocation(game: GameWriteData, outputDirect
 export async function unzipGameToOutputLocation(game: GameWriteData, outputDirectoryPath: string, createGameFolder = false): Promise<MoveResult> {
     const gameFiles = new Array<string>();
     let changesMade = false;
-    for(const src of game.fileAbsolutePaths) {
+    for(const src of game.readAbsolutePaths) {
         const filename = basename(src);
         const filenameNoExtension = filename.slice(0, filename.lastIndexOf("."));
         const outputDirectoryPathEnhanced = createGameFolder 
