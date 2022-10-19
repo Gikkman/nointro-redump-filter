@@ -11,6 +11,8 @@ This folder contains files that are zipped, and once unzipped, contians files th
   * Is a single-disc game.
   * There are a Japanese and an US version.  We expect the program to pick the US version
   * Since it should pick the US version, the language should be 'En'
+* game-c
+  * This should be skipped due to the file extension filter
 * game-s
   * Is a single-disc game.
   * Has no region, so it should get region 'Unknown'
@@ -22,11 +24,15 @@ This folder files that are zipped, but should not be unzipped. Instead, they sho
   * Has a Japanese and an European version. We expect the program to pick the EU version
   * The EU version lists language En, Es and De. We expect those to be picked up.
 * game-b
-  * We will send a file containing alias information, so game-b should have an alias "game-bb"
   * Has no region, so it should get region 'Unknown'
   * Since it has no region, the language should default to 'En'
 * game-c
   * There are two Japanese versions, but one is tagged as translated. We expect the program to pick the translated version.
   * Language should be "En" due to the translation
+* game-d
+  * Has two other regional names, game-dd and game-ddd
+  * Should pick 'game-dd' since we prefer the US version
 * game-s
   * Is in a subfolder named "special", so the copy should also be in a subfolder named "special"
+* game-remove-me
+  * This game should be removed by the collection rules

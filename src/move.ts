@@ -50,6 +50,9 @@ export async function moveGames(data: ProcessResult) {
             console.log(`Processed ${progressCounter}/${bestGames.length} `)
         }
     }
+
+
+
     // TODO: Write "best.json" with info from what we copied or extracted
     writeJsonToDisc(finalOutput, data.outputAbsoultePath, "best.json")
 }
