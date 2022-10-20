@@ -6,23 +6,22 @@ import { loadClonelist, loadCollection, titlefyString, writeJsonToDisc } from ".
 export type SetupData =  ReturnType<typeof setup>;
 export type ProcessResult = SetupData & {games: ProcessedGame[]}
 
-export function setup(
+export function setup(data: {
         inputBaseDirectory: string, 
         outputBaseDirectory: string, 
         skipFileExtensions: string[], 
         skipFileTags: string[], 
         skipTitlePrefixes: string[], 
-        collectionFile: string
-        ) {
-    const collection = loadCollection(collectionFile);
+        collection: Collection,
+        collectionRules: CollectionRules,
+    }) {
+    const {inputBaseDirectory, outputBaseDirectory, skipFileExtensions, skipFileTags, skipTitlePrefixes, collection, collectionRules} = data;
     console.log(collection);
-    
+
     const inputRootDirectory = collection.inputDirectoryRootOverride ?? inputBaseDirectory;
     const inputAbsolutePaths = collection.input.map(elem => path.join(inputRootDirectory, elem));
     const outputAbsoultePath = path.join(outputBaseDirectory, collection.output);
     mkdirIfNotExists(outputAbsoultePath);
-
-    const collectionRules = clonelistDataToCollectionRule(collection.clonelists)
     return {
         skipFileExtensions: new Set<string>( skipFileExtensions.map(s => s.toLowerCase()) ),
         skipFileTags: new Set<string>( [...skipFileTags].map(s => s.toLowerCase()) ), 
@@ -34,36 +33,6 @@ export function setup(
         platform: collection.platform,
         generateMultiDiscFile: collection.generateMultiDiscFile
     }
-}
-
-function clonelistDataToCollectionRule(clonelists?: string[]): CollectionRules {
-    const foreignTitleToEnglishTitle = new Map<string, string>();
-    const englishTitleToForeignTitles = new Map<string, string[]>();
-    const removeTitles = new Array<string>();
-    
-    for(const clonelist of clonelists ?? []) {
-        const data = loadClonelist(clonelist);
-    
-        if(data.renames) {
-            for( const entries of Object.entries(data.renames)) {
-                const title: string = entries[0];
-                const mappings = entries[1] as [string, number][];
-                for(const mapping of mappings) {
-                    foreignTitleToEnglishTitle.set( mapping[0], title )
-                }
-                englishTitleToForeignTitles.set(title, mappings.map(m => m[0]))
-            }
-        }
-    
-        if(data.removes) {
-            for( const entries of Object.entries(data.removes)) {
-                const title: string = entries[0];
-                removeTitles.push( title )
-            }
-        }
-    }
-
-    return {removeTitles, foreignTitleToEnglishTitle, englishTitleToForeignTitles}
 }
 
 export function run(data: ReturnType<typeof setup>) : ProcessResult{

@@ -1,6 +1,6 @@
 import path from "path";
 import { mkdirIfNotExists, readCollectionFiles, verifyExists } from "./files";
-import { clonelistDirExists, loadYaml } from "./util";
+import { clonelistDataToCollectionRule, clonelistDirExists, loadCollection, loadYaml } from "./util";
 import { ProcessResult, run, setup, SetupData } from "./work";
 import { exit } from "process";
 import { moveGames } from "./move";
@@ -17,16 +17,19 @@ const collectionsDirectory = path.resolve(col.collectionsDirectory);
 const outputBaseDirectory = path.resolve(col.outputRootDirectory);
 const skipFileExtensions = col.skipFileExtensions ?? [];
 const skipFileTags = col.skipFileTags ?? [];
-const skipFilePrefixes = col.skipFilePrefixes ?? [];
+const skipTitlePrefixes = col.skipFilePrefixes ?? [];
 verifyExists(inputBaseDirectory);
 verifyExists(collectionsDirectory);
 mkdirIfNotExists(outputBaseDirectory)
 
 const collectionFiles = readCollectionFiles(collectionsDirectory);
 const collectionData: SetupData[] = [];
-for (const collection of collectionFiles) {
-    console.log("Processing rom collection:", collection);
-    const data = setup(inputBaseDirectory, outputBaseDirectory, skipFileExtensions, skipFileTags, skipFilePrefixes, collection);
+for (const collectionFile of collectionFiles) {
+    console.log("Processing rom collection:", collectionFile);
+    
+    const collection = loadCollection(collectionFile);
+    const collectionRules = clonelistDataToCollectionRule(collection.clonelists)
+    const data = setup({inputBaseDirectory, outputBaseDirectory, skipFileExtensions, skipFileTags, skipTitlePrefixes, collection, collectionRules});
     collectionData.push(data);
 
     if(data.generateMultiDiscFile === "BizhawkXML") {

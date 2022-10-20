@@ -83,6 +83,36 @@ export function loadCollection(filename: string): Collection {
     return collection;
 }
 
+export function clonelistDataToCollectionRule(clonelists?: string[]): CollectionRules {
+    const foreignTitleToEnglishTitle = new Map<string, string>();
+    const englishTitleToForeignTitles = new Map<string, string[]>();
+    const removeTitles = new Array<string>();
+    
+    for(const clonelist of clonelists ?? []) {
+        const data = loadClonelist(clonelist);
+    
+        if(data.renames) {
+            for( const entries of Object.entries(data.renames)) {
+                const title: string = entries[0];
+                const mappings = entries[1] as [string, number][];
+                for(const mapping of mappings) {
+                    foreignTitleToEnglishTitle.set( mapping[0], title )
+                }
+                englishTitleToForeignTitles.set(title, mappings.map(m => m[0]))
+            }
+        }
+    
+        if(data.removes) {
+            for( const entries of Object.entries(data.removes)) {
+                const title: string = entries[0];
+                removeTitles.push( title )
+            }
+        }
+    }
+
+    return {removeTitles, foreignTitleToEnglishTitle, englishTitleToForeignTitles}
+}
+
 export function loadYaml(path: string) : any {
     return yaml.parse( readFileSync(path, 'utf-8'), { strict: true} )
 }

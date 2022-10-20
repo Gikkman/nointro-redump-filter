@@ -2,39 +2,43 @@ import { existsSync, readFileSync, readSync, rmSync } from "fs";
 import path, { join } from "path";
 import { mkdirIfNotExists } from "../src/files";
 import { BestWriteData, moveGames } from "../src/move";
-import { run } from "../src/work";
+import { run, setup } from "../src/work";
 import { XMLParser } from 'fast-xml-parser'
 import { titlefyString } from "../src/util";
 
 describe("Test disc-based", function() {
     const outputDir = path.join(__dirname, "system-test-created");
-    const inputDir = path.join(__dirname, "system-test-input", "disc-based");
+    const inputDir = path.join(__dirname, "system-test-input");
 
     // Pre conditions
     if(existsSync(outputDir)) {
         throw new Error("Error. Can't run tests. Dir already exists: " + outputDir)
     }
 
-    it("Can handle disc based games", async () => {
-        mkdirIfNotExists(outputDir, false);
-        
+    it("Can handle disc based games", async () => {        
         // Run everything
-        const cr: CollectionRules = {
+        const collection: Collection = {
+            input: ["disc-based"],
+            output: ".",
+            platform: "Playstation",
+            generateMultiDiscFile: "BizhawkXML",
+            unzip: "sub-folder",
+        }
+        const collectionRules: CollectionRules = {
             englishTitleToForeignTitles: new Map(),
             foreignTitleToEnglishTitle: new Map(),
             removeTitles: []
         }
-        const res = run({
-            generateMultiDiscFile: "BizhawkXML",
-            inputAbsolutePaths: [inputDir],
-            outputAbsoultePath: outputDir,
-            platform: "PS1",
-            unzip: "sub-folder",
-            skipFileTags: new Set(),
-            skipFileExtensions: new Set(["rar"]),
-            skipTitlePrefixes: new Set(cr.removeTitles.map(titlefyString)), // This matches what we do in setup
-            collectionRules: cr
+        const data = setup({
+            inputBaseDirectory: inputDir,
+            outputBaseDirectory: outputDir,
+            skipFileExtensions: ["rar"],
+            skipFileTags: [],
+            skipTitlePrefixes: [],
+            collection,
+            collectionRules,
         })
+        const res = run(data)
         await moveGames(res)
 
         // Do checks 
@@ -81,18 +85,21 @@ describe("Test disc-based", function() {
 
 describe("Test cart-based", function() {
     const outputDir = path.join(__dirname, "system-test-created");
-    const inputDir = path.join(__dirname, "system-test-input", "cart-based");
+    const inputDir = path.join(__dirname, "system-test-input");
 
     // Pre conditions
     if(existsSync(outputDir)) {
         throw new Error("Error. Can't run tests. Dir already exists: " + outputDir)
     }
 
-    it("Can handle cart based games", async () => {
-        mkdirIfNotExists(outputDir, false);
-        
+    it("Can handle cart based games", async () => {        
         // Run everything
-        const cr: CollectionRules = {
+        const collection: Collection = {
+            input: ["cart-based-1", "cart-based-2"],
+            output: ".",
+            platform: "Nintendo Entertainment System",
+        }
+        const collectionRules: CollectionRules = {
             englishTitleToForeignTitles: new Map([
                 ['game-dd', ['game-d', 'game-ddd']]
             ]),
@@ -100,19 +107,18 @@ describe("Test cart-based", function() {
                 ['game-d', 'game-dd'],
                 ['game-ddd', 'game-dd']
             ]),
-            removeTitles: ['game-remove-me']
+            removeTitles: ['game-remove-me'],
         }
-        const res = run({
-            generateMultiDiscFile: undefined,
-            inputAbsolutePaths: [inputDir],
-            outputAbsoultePath: outputDir,
-            platform: "NES",
-            unzip: undefined,
-            skipFileTags: new Set(),
-            skipFileExtensions: new Set(),
-            skipTitlePrefixes: new Set(cr.removeTitles.map(titlefyString)), // This matches what we do in setup
-            collectionRules: cr
+        const data = setup({
+            inputBaseDirectory: inputDir,
+            outputBaseDirectory: outputDir,
+            skipFileExtensions: [],
+            skipFileTags: [],
+            skipTitlePrefixes: [],
+            collection,
+            collectionRules,
         })
+        const res = run(data)
         await moveGames(res)
 
         // Do checks
@@ -233,7 +239,10 @@ function assertCartGame(writeData: BestWriteData[], data: CartGameAssert) {
     expect(game).withContext(`Game ${data.title} should be in write data`).toBeTruthy();
 
     // Check file was moved
-    expect(fileExists(data.fileRelativePath))
+    expect(fileExists(data.fileRelativePath)).toBeTrue()
+    for(const f of game?.files ?? []) {
+        expect(fileExists(f)).toBeTrue()
+    }
 
     // Check title match
     expect(game?.title).toEqual(data.title)
