@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFile, writeFileSync } from "fs";
-import { join, resolve } from "path";
+import { basename, join, resolve } from "path";
 import * as yaml from "yaml";
 
 /** Search a string for each pattern. For the pattern that is found furthest from the
@@ -67,16 +67,14 @@ export function clonelistDirExists() {
     return existsSync(clonelistDirLocation);
 }
 
-export function loadCollection(filename: string): Collection {
-    const path = resolve("collections");
-    const file = join(path, filename);
-    if(!existsSync(file)) {
-        console.error(`Can't load collection file: ${filename}. File not found at ${file}`)
+export function loadCollection(path: string): Collection {
+    if(!existsSync(path)) {
+        console.error(`Can't load collection file: ${basename(path)}. File not found at ${path}`)
         process.exit(1);
     }
-    const collection = loadYaml(file);
+    const collection = loadYaml(path);
     if( !isValidCollection(collection) ) {
-        console.error(`Invalid collection definition found at ${file}. Please check the file structure.`)
+        console.error(`Invalid collection definition found at ${path}. Please check the file structure.`)
         console.error(collection);
         process.exit(1);
     }
@@ -104,6 +102,13 @@ export function clonelistDataToCollectionRule(clonelists?: string[]): Collection
     
         if(data.removes) {
             for( const entries of Object.entries(data.removes)) {
+                const title: string = entries[0];
+                removeTitles.push( title )
+            }
+        }
+
+        if(data.categories) {
+            for( const entries of Object.entries(data.categories)) {
                 const title: string = entries[0];
                 removeTitles.push( title )
             }

@@ -42,7 +42,7 @@ describe("Test disc-based", function() {
         await moveGames(res)
 
         // Do checks 
-        const writeData: BestWriteData[] = JSON.parse( readFileSync( path.join(outputDir, "best.json"), 'utf8') );
+        const writeData: BestWriteData[] = JSON.parse( readFileSync( path.join(outputDir, "_best.json"), 'utf8') );
         expect(writeData.length).toBe(3);
 
         assertDiscGame(writeData, {
@@ -122,7 +122,7 @@ describe("Test cart-based", function() {
         await moveGames(res)
 
         // Do checks
-        const writeData: BestWriteData[] = JSON.parse( readFileSync( path.join(outputDir, "best.json"), 'utf8') );
+        const writeData: BestWriteData[] = JSON.parse( readFileSync( path.join(outputDir, "_best.json"), 'utf8') );
         expect(writeData.length).toBe(5);
 
         assertCartGame(writeData, {

@@ -23,7 +23,7 @@ export async function moveGames(data: ProcessResult) {
     
     const bestGames = buildBestGamesJson(data);
     const finalOutput: BestWriteData[] = new Array();
-    let progressCounter = 0;+
+    let progressCounter = 0;
     console.log(`Moving ${data.platform}. ${bestGames.length} files.`)
     console.log(`Processed 0/${bestGames.length} `)
     for(const game of bestGames) {
@@ -37,7 +37,7 @@ export async function moveGames(data: ProcessResult) {
         }
         
         let writeData: BestWriteData;
-        if(moveResult.changesMade && data.generateMultiDiscFile === 'BizhawkXML') {
+        if(data.generateMultiDiscFile === 'BizhawkXML') {
             const fileName = await writeBizhawkXmlFile(moveResult.movedFilesRelativePaths, data.outputAbsoultePath, game.title, data.platform);
             writeData = {title: game.title, aliases: game.aliases, languages: [...game.languages], files: [fileName]};
         }
@@ -54,7 +54,7 @@ export async function moveGames(data: ProcessResult) {
 
 
     // TODO: Write "best.json" with info from what we copied or extracted
-    writeJsonToDisc(finalOutput, data.outputAbsoultePath, "best.json")
+    writeJsonToDisc(finalOutput, data.outputAbsoultePath, "_best.json")
 }
 
 function buildBestGamesJson(data: ProcessResult) {

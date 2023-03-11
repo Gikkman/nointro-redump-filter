@@ -6,3 +6,11 @@ clonelists:
     - 'NEC - PC Engine CD & TurboGrafx CD.json'
 unzip: sub-folder
 generateMultiDiscFile: BizhawkXML
+skipFilePrefixes:
+  - "ROM"
+  - "Sexy"
+  - "Quiz"
+  - "PC Engine"
+  - "Virgin"
+  - "Laser Soft Visual"
+  - "Ultra Box"

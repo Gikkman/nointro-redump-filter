@@ -1,5 +1,5 @@
-import path from "path";
-import { mkdirIfNotExists, readCollectionFiles, verifyExists } from "./files";
+import path, { resolve } from "path";
+import { mkdirIfNotExists, verifyExists } from "./files";
 import { clonelistDataToCollectionRule, clonelistDirExists, loadCollection, loadYaml } from "./util";
 import { ProcessResult, run, setup, SetupData } from "./work";
 import { exit } from "process";
@@ -13,16 +13,15 @@ if( !clonelistDirExists() ) {
 
 const col = loadYaml("collections.yaml") as Collections;
 const inputBaseDirectory = path.resolve(col.inputRootDirectory);
-const collectionsDirectory = path.resolve(col.collectionsDirectory);
+const collectionFiles = col.collectionFiles.map(f => path.resolve(f))
 const outputBaseDirectory = path.resolve(col.outputRootDirectory);
 const skipFileExtensions = col.skipFileExtensions ?? [];
 const skipFileTags = col.skipFileTags ?? [];
 const skipTitlePrefixes = col.skipFilePrefixes ?? [];
 verifyExists(inputBaseDirectory);
-verifyExists(collectionsDirectory);
+collectionFiles.forEach(f => verifyExists(f))
 mkdirIfNotExists(outputBaseDirectory)
 
-const collectionFiles = readCollectionFiles(collectionsDirectory);
 const collectionData: SetupData[] = [];
 for (const collectionFile of collectionFiles) {
     console.log("Processing rom collection:", collectionFile);
@@ -40,12 +39,18 @@ for (const collectionFile of collectionFiles) {
     }
 }
 
-const processed = new Array<ProcessResult>();
-for (const data of collectionData) {
-    const res = run(data);
-    moveGames(res);
-    processed.push(res);
-    console.log("-----")
-}
+main()
+.then(() => {
+    console.log("Done")
+})
 
+async function main() {
+    const processed = new Array<ProcessResult>();
+    for (const data of collectionData) {
+        const res = run(data);
+        await moveGames(res);
+        processed.push(res);
+        console.log("-----")
+    }
+}
 

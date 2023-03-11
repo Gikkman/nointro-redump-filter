@@ -2,7 +2,6 @@ platform: 'Sega Saturn'
 output: 'Sega - Saturn [sat]'
 input:
     - 'Sega - Saturn (Redump)'
-    - 'Sega - Saturn [T-En] Collection'
 clonelists:
     - 'Sega - Saturn.json'
 unzip: sub-folder

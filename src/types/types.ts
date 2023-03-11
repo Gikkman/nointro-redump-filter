@@ -23,7 +23,7 @@ type Collections = {
     skipFileExtensions?: string[],
     skipFileTags?: string[],
     skipFilePrefixes?: string[]
-    collectionsDirectory: string,
+    collectionFiles: string[],
 }
 
 type CollectionRules = {

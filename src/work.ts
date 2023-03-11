@@ -62,7 +62,7 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
     ///////////////////////////////////////////////////////////////////////
     // Write all results to a file
     console.log("Grouping games done. Unique game titles:", prioratisedGames.length);
-    writeJsonToDisc(prioratisedGames, data.outputAbsoultePath, "all.json")
+    writeJsonToDisc(prioratisedGames, data.outputAbsoultePath, "_all.json")
 
     return {...data, games: prioratisedGames}
 }

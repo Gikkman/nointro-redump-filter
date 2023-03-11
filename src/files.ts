@@ -4,10 +4,10 @@ import { recursiveIntersection, titlefyString } from "./util";
 
 export function verifyExists(path: fs.PathLike) {
     if( !fs.existsSync(path) ) {
-        console.error("Input directory does not exist:", path);
+        console.error("Input does not exist:", path);
         process.exit(1);
     } else {
-        console.log("Input directory exists:", path);
+        console.log("Input exists:", path);
     }
 }
 
@@ -26,17 +26,6 @@ export function mkdirIfNotExists(path: fs.PathLike, printLogs: boolean = true): 
     fs.mkdirSync(path, {recursive: true});
     if(printLogs) console.log("Directory created:", path)
     return;
-}
-
-export function readCollectionFiles(dirPath: string) {
-    const files = new Array<string>();
-    const dirents = fs.readdirSync(dirPath, {withFileTypes: true});
-    for(const dirent of dirents) {
-        if(dirent.isFile() && dirent.name.endsWith(".yaml")) {
-            files.push(dirent.name)
-        }
-    }
-    return files;
 }
 
 export function listFilesFlat(dirRelativePath: string, skipFileExtensions: Set<string>, ...dirPaths: string[]): GameFile[] {

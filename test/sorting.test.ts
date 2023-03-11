@@ -13,7 +13,7 @@ function mkData(...data: [string, string[], string[]][]): TestData[] {
 }
 
 function toGameWithVerions(...versions: string[]) {
-    const g = versions.map(g => ({file:g, dir: ""}))
+    const g = versions.map(g => ({file:g, dirAbsolutePath: "", dirRelativePath: ""}))
                  .map(g => ({...extractTags(g),...g}))
                  .map(g => ({...extractRegionInfo(g), ...g}))
                  .map(g => ({gameTitle: extractTitle(g,g), ...g}));

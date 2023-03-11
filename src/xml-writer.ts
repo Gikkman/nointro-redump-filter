@@ -14,8 +14,8 @@ enum DiscSystemKey {
     Playstation = "PSX",
     Saturn = "SAT",
     PcFx = "PCFX",
-    SegaCD = "SEGACD",
-    TG16CD = "TG16CD",
+    SegaCD = "GEN",
+    TG16CD = "PCECD",
 }
 
 /** Writes a BizhawkXML file for a multi-file game.

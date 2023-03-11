@@ -1,5 +1,5 @@
 inputRootDirectory: /mnt/u/Spel
-outputRootDirectory: output
+outputRootDirectory: /mnt/w/Gamez
 skipFileExtensions:
     - chd
     - mp3
@@ -35,4 +35,29 @@ skipFilePrefixes:
     - 4 games in one
     - 4 in 1
     - 4-in-1
-collectionsDirectory: ./collections
+collectionFiles:
+#    - ./collections/Atari - 7800.yaml
+#    - ./collections/Atari - Lynx.yaml
+#    - ./collections/Bandai - WonderSwan.yaml
+#    - ./collections/Bandai - WonderSwan Color.yaml
+#    - ./collections/NEC - PC Engine - TurboGrafx 16.yaml
+#    - ./collections/NEC - PC Engine CD - TurboGrafx 16 CD.yaml
+#    - ./collections/NEC - PC Engine SuperGrafx.yaml
+#    - ./collections/Nintendo - Family Computer Disc System.yaml
+#    - ./collections/Nintendo - Game Boy Advance.yaml
+#    - ./collections/Nintendo - Game Boy Color.yaml
+#    - ./collections/Nintendo - Game Boy.yaml
+#    - ./collections/Nintendo - Nintendo 64.yaml
+#    - ./collections/Nintendo - Nintendo Entertainment System.yaml
+#    - ./collections/Nintendo - Super Nintendo Entertainment System.yaml
+#    - ./collections/Nintendo - Virtual Boy.yaml
+#    - ./collections/SNK - Neo Geo Pocket Color.yaml
+#    - ./collections/SNK - Neo Geo Pocket.yaml
+#    - ./collections/Sega - 32X.yaml
+#    - ./collections/Sega - Game Gear.yaml
+#    - ./collections/Sega - Master System - Mark III.yaml
+#    - ./collections/Sega - Mega CD & Sega CD.yaml
+#    - ./collections/Sega - Mega Drive - Genesis.yaml
+#    - ./collections/Sega - SG-1000.yaml
+#    - ./collections/Sega - Saturn.yaml
+     - ./collections/Sony - Playstation.yaml
