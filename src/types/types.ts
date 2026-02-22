@@ -80,4 +80,21 @@ type GameWriteData = {
     languages: Set<string>,
     readAbsolutePaths: string[],
     writeRelativePath: string,
+    metadata: GameGenreAndMultiplayer,
+};
+
+type GameMetadataSource = "launchbox" | "igdb" | "none";
+
+type GameGenreAndMultiplayer = {
+    genres: string[];
+    localMultiplayer: {
+        coop: boolean;
+        vs: boolean;
+    };
+    source: GameMetadataSource;
+    matchedName?: string;
+};
+
+type GameWithMetadata = ProcessedGame & {
+    metadata: GameGenreAndMultiplayer;
 };

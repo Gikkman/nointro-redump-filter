@@ -1,16 +1,16 @@
-import { closeSync, constants, existsSync, openSync } from "fs";
+import { constants, existsSync } from "fs";
 import { copyFile } from "fs/promises";
 import StreamZip from "node-stream-zip";
-import path, { join, basename, resolve } from "path";
+import { join, basename } from "path";
 import { mkdirIfNotExists } from "./files";
 import { writeJsonToDisc } from "./util";
-import { ProcessResult } from "./work";
 import { writeBizhawkXmlFile } from "./xml-writer";
+import { MetadataResult } from "./metadata/game-metadata";
 
 export type MoveResult = {movedFilesRelativePaths: string[], changesMade: boolean}
-export type BestWriteData = {files: string[], title: string, aliases?: string[], languages: string[]}
+export type BestWriteData = {files: string[], title: string, aliases?: string[], languages: string[], metadata: Record<string, any>}
 
-export async function moveGames(data: ProcessResult) {
+export async function moveGames(data: MetadataResult) {
     /* Create output folder if needed
      * Write the best.json file there
      * if we should unzip:
@@ -39,10 +39,10 @@ export async function moveGames(data: ProcessResult) {
         let writeData: BestWriteData;
         if(data.generateMultiDiscFile === 'BizhawkXML') {
             const fileName = await writeBizhawkXmlFile(moveResult.movedFilesRelativePaths, data.outputAbsoultePath, game.title, data.platform);
-            writeData = {title: game.title, aliases: game.aliases, languages: [...game.languages], files: [fileName]};
+            writeData = {title: game.title, aliases: game.aliases, languages: [...game.languages], files: [fileName], metadata: game.metadata};
         }
         else {
-            writeData = {title: game.title, aliases: game.aliases, languages: [...game.languages], files: moveResult.movedFilesRelativePaths};
+            writeData = {title: game.title, aliases: game.aliases, languages: [...game.languages], files: moveResult.movedFilesRelativePaths, metadata: game.metadata};
         }
         finalOutput.push(writeData);
 
@@ -51,13 +51,11 @@ export async function moveGames(data: ProcessResult) {
         }
     }
 
-
-
     // TODO: Write "best.json" with info from what we copied or extracted
     writeJsonToDisc(finalOutput, data.outputAbsoultePath, "_best.json")
 }
 
-function buildBestGamesJson(data: ProcessResult) {
+function buildBestGamesJson(data: MetadataResult) {
     ///////////////////////////////////////////////////////////////////////
     // Write best results to another file
     const best = new Array<GameWriteData>();
@@ -78,7 +76,8 @@ function buildBestGamesJson(data: ProcessResult) {
             aliases: data.collectionRules.englishTitleToForeignTitles.get(bestVersion.gameTitle),
             languages: bestVersion.languages,
             readAbsolutePaths: fileAbsolutePaths,
-            writeRelativePath: shortestCommonRelativePath
+            writeRelativePath: shortestCommonRelativePath,
+            metadata: game.metadata
         })
     }
     return best;

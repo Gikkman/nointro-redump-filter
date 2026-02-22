@@ -21,17 +21,18 @@
     },
     "homepage": "https://github.com/Gikkman/nointro-redump-filter#readme",
     "dependencies": {
+        "fastest-levenshtein": "^1.0.16",
+        "fast-xml-parser": "^4.5.3",
         "node-stream-zip": "^1.15.0",
         "properties-reader": "^2.2.0",
         "yaml": "^2.1.1"
     },
     "devDependencies": {
         "@types/jasmine": "^3.10.2",
-        "@types/node": "^16.11.17",
+        "@types/node": "^18.19.0",
         "@types/properties-reader": "^2.1.1",
         "@types/sharp": "^0.29.2",
         "copyfiles": "^2.4.1",
-        "fast-xml-parser": "^4.0.11",
         "jasmine": "^3.10.0",
         "jasmine-spec-reporter": "^7.0.0",
         "jasmine-ts": "^0.4.0",
@@ -43,7 +44,7 @@
     "pkg": {
         "outputPath": "release",
         "targets": [
-            "node14-win-x64"
+            "node18-win-x64"
         ]
     }
 }

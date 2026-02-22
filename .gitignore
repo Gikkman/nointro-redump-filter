@@ -103,9 +103,12 @@ dist
 # TernJS port file
 .tern-port
 
+
 roms
 output
 build
 
 test/test-created
 test/system-test-created
+
+config.yaml

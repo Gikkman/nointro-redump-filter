@@ -1,10 +1,10 @@
 import path from "path";
 import { extractDiscInfo, extractRegionInfo, extractTags, groupGamesByTitle, listFilesFlat, mkdirIfNotExists, clearsTagRequirements, clearsTitlePrefixRequirements, extractTitle } from "./files";
 import { findMostSuitableVersion } from "./sorting";
-import { loadClonelist, loadCollection, titlefyString, writeJsonToDisc } from "./util";
+import { titlefyString } from "./util";
 
 export type SetupData =  ReturnType<typeof setup>;
-export type ProcessResult = SetupData & {games: ProcessedGame[]}
+export type WorkResult = SetupData & {games: ProcessedGame[]}
 
 export function setup(data: {
         inputBaseDirectory: string, 
@@ -35,7 +35,7 @@ export function setup(data: {
     }
 }
 
-export function run(data: ReturnType<typeof setup>) : ProcessResult{
+export function run(data: ReturnType<typeof setup>) : WorkResult{
     ///////////////////////////////////////////////////////////////////////
     // Find all files
     console.log("Scanning input directories for platform", data.platform);
@@ -59,10 +59,6 @@ export function run(data: ReturnType<typeof setup>) : ProcessResult{
     const filteredDiscGroups = discGroups.filter(g => clearsTitlePrefixRequirements(data.skipTitlePrefixes, g));
     const prioratisedGames = filteredDiscGroups.map(g => findMostSuitableVersion(g))
 
-    ///////////////////////////////////////////////////////////////////////
-    // Write all results to a file
     console.log("Grouping games done. Unique game titles:", prioratisedGames.length);
-    writeJsonToDisc(prioratisedGames, data.outputAbsoultePath, "_all.json")
-
     return {...data, games: prioratisedGames}
 }

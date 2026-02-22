@@ -93,7 +93,7 @@ export function filterAwayTranslations(versions: GameVersion[]): GameVersion[] {
     return filtered.length > 0 ? filtered : versions;
 }
 
-export function findMostSuitableVersion(game: Game): Game & {bestVersion: GameVersion} {
+export function findMostSuitableVersion(game: Game): ProcessedGame {
     if(game.versions.length === 1) return {...game, bestVersion: game.versions[0]};
 
     const candidatesAfterLanguages = filterCandidatesByProperty(LanguageScoreMap, game.versions, (v: GameVersion) => v.languages);
