@@ -1,6 +1,7 @@
 launchbox:
   enabled: true
-  xmlPath: "/path/to/launchbox.xml"
+  downloadUrl: "https://gamesdb.launchbox-app.com/Metadata.zip"
+  # xmlPath: "/path/to/launchbox.xml"
 igdb:
   enabled: true
   clientId: "your_client_id"
