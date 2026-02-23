@@ -1,7 +1,7 @@
 import path from "path";
 import { mkdirIfNotExists, verifyExists } from "./files";
-import { clonelistDataToCollectionRule, clonelistDirExists, loadCollection, loadYaml, writeJsonToDisc } from "./util";
-import { WorkResult, run, setup, SetupData } from "./work";
+import { clonelistDataToCollectionRule, clonelistDirExists, loadCollection, loadYaml } from "./util";
+import { run, setup, SetupData } from "./work";
 import { exit } from "process";
 import { moveGames } from "./move";
 import { guessBizhawkDiscSystemKey } from "./xml-writer";
@@ -18,8 +18,10 @@ async function main() {
         exit(1);
     }
 
+    // TODO: We should somehow consider Launchbox's list of alternate titles too, when we group games.
+    // For example, X Games Pro Boarder, has several alternate titles in Launchbox. Abe '99 is another example.
+
     const config = loadYaml("config.yaml") as any;
-    preHeatMetadata(config);
 
     const col = loadYaml("collections.yaml") as Collections;
     const inputBaseDirectory = path.resolve(col.inputRootDirectory);
@@ -52,6 +54,7 @@ async function main() {
     const processed = new Array<MetadataResult>();
     for (const data of collectionData) {
         const grouped = run(data);
+        await preHeatMetadata(config);
         const withMeta = await queryMetadata(config, grouped);
         await moveGames(withMeta);
         processed.push(withMeta);

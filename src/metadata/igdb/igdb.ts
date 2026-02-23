@@ -1,5 +1,6 @@
 import {distance} from "fastest-levenshtein";
 import { RequestLimiter } from "./request-limiter";
+import { platform } from "os";
 
 export type IgdbLocalMultiplayer = {
     supportsLocalMultiplayer: boolean;
@@ -103,9 +104,8 @@ async function fetchPostText(url: string, headers: Record<string, string>, body:
 async function getTwitchAppAccessToken(config: IgdbEnabledConfig): Promise<string> {
     const clientId = config.clientId;
     const clientSecret = config.clientSecret;
-
     if (!clientId || !clientSecret) {
-        throw new Error("Missing env vars: IGDB_CLIENT_ID and/or IGDB_CLIENT_SECRET");
+        throw new Error("Missing: IGDB_CLIENT_ID and/or IGDB_CLIENT_SECRET");
     }
 
     if (cachedTwitchToken && cachedTwitchToken.expiresAtMs - Date.now() > 30_000) {
@@ -150,6 +150,7 @@ async function getTwitchAppAccessToken(config: IgdbEnabledConfig): Promise<strin
 async function igdbQuery<T>(endpoint: string, query: string, config: IgdbEnabledConfig): Promise<T> {
 
     return requestLimiter.schedule(async () => {
+        console.log("Sending IGDB request to endpoint %s: %s", endpoint, query)
         const token = await getTwitchAppAccessToken(config);
         const url = `https://api.igdb.com/v4/${endpoint}`;
 
@@ -173,6 +174,7 @@ function scoreCandidate(queryName: string, candidateName: string): number {
 }
 
 export async function fetchAllPlatformsFromIgdb(config: IgdbEnabledConfig): Promise<IgdbPlatform[]> {
+    // TODO: Ensure there isn't several concurrent requests to this endpoint
     if (platformCache) {
         return platformCache;
     }
@@ -270,6 +272,8 @@ function mapIgdbGenreName(genre: string|undefined): string|undefined {
 
 export async function queryIgdbGenreAndLocalMultiplayer(gameName: string, system: string, config: IgdbEnabledConfig): Promise<IgdbGameGenreAndMultiplayerResult|undefined> {
     const platformId = await resolvePlatformId(system, config);
+
+    if(!gameName) return undefined;
 
     const escapedName = gameName.replace(/\"/g, "\\\"");
     const wherePlatform = platformId ? ` where platforms = (${platformId});` : "";

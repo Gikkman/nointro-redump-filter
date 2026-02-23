@@ -6,7 +6,14 @@ import { Readable } from "stream";
 import type { ReadableStream as NodeReadableStream } from "stream/web";
 import StreamZip from "node-stream-zip";
 import { LaunchBoxGameMetadataResult } from "./types";
-import { ensureLaunchBoxIndex, extractGenresFromXml, makeKey } from "./xml-parser";
+import { ensureLaunchBoxIndex, extractGenresFromXml, extractPlatformsFromXml, makeKey } from "./xml-parser";
+
+// TODO: Look up game-alternate-name as a fallback when looking up a game name
+// This will require a 2nd index, that references stuff via their DatabaseID
+// We might wanna make one map of DatabaseID -> Game
+// And then maps:
+// Primary title -> DatabaseID
+// Alternate title -> DatabaseID
 
 export type LaunchBoxMetadataDownloadResult = {
     zipPath: string;
@@ -148,4 +155,17 @@ export async function listLaunchBoxGenres(opts?:  LaunchBoxMetadataConfig): Prom
     return extractGenresFromXml(xmlPath);
 }
 
+export async function listLaunchBoxPlatforms(opts?:  LaunchBoxMetadataConfig): Promise<string[]> {
+    if(!opts?.enabled) {
+        return [];
+    }
+    
+    let xmlPath: string;
+    if('xmlPath' in opts) {
+        xmlPath = opts.xmlPath;
+    } else {
+        xmlPath = await downloadLaunchBoxMetadataXml(opts);
+    }
 
+    return extractPlatformsFromXml(xmlPath);
+}

@@ -1,9 +1,11 @@
 import { SetupData, WorkResult } from "../work";
-import { IgdbGameGenreAndMultiplayerResult, IgdbMetadataConfig, queryIgdbGenreAndLocalMultiplayer } from "./igdb/igdb";
+import { fetchAllPlatformsFromIgdb, IgdbGameGenreAndMultiplayerResult, IgdbMetadataConfig, queryIgdbGenreAndLocalMultiplayer } from "./igdb/igdb";
 import { LaunchBoxMetadataConfig, queryLaunchBoxGenreAndLocalMultiplayer } from "./launchbox/launchbox";
 import { LaunchBoxGameMetadataResult } from "./launchbox/types";
 
 export type MetadataResult = SetupData & {games: GameWithMetadata[]}
+
+// TODO: Some kind of class / enum for platforms, so we map input platform to their Launchbox and IGDB names, and their BizhawkDiscName (if it has one)
 
 function makeNoneResult(): GameGenreAndMultiplayer {
     return {
@@ -17,12 +19,16 @@ export async function preHeatMetadata(opts: {
         launchbox: LaunchBoxMetadataConfig;
         igdb: IgdbMetadataConfig;
     }) {
+    const promises = [];
     if(opts.launchbox.enabled) {
-        await queryLaunchBoxGenreAndLocalMultiplayer("", "", opts.launchbox);
+        const p = queryLaunchBoxGenreAndLocalMultiplayer("", "", opts.launchbox);
+        promises.push(p);
     }
     if(opts.igdb.enabled) {
-        await queryIgdbGenreAndLocalMultiplayer("", "", opts.igdb);
+        const p = await fetchAllPlatformsFromIgdb(opts.igdb);
+        promises.push(p);
     }
+    await Promise.all(promises);
 }
 
 export async function queryMetadata(config: any, pastResult: WorkResult): Promise<MetadataResult> {
@@ -31,18 +37,18 @@ export async function queryMetadata(config: any, pastResult: WorkResult): Promis
         ...pastResult,
         games
     };
-
+    const promises: Promise<void>[] = [];
     for(const game of pastResult.games) {
-        queryGameGenreAndLocalMultiplayer(game.title, pastResult.platform, config)
+        const p = queryGameGenreAndLocalMultiplayer(game.bestVersion.gameTitle, pastResult.platform, config)
         .then(md => {
             games.push({
                 ...game,
                 metadata: md
             });
         })
-
+        promises.push(p);
     }
-    
+    await Promise.all(promises);
     return newCopy;
 }
 
@@ -57,10 +63,12 @@ export async function queryGameGenreAndLocalMultiplayer(
 ): Promise<GameGenreAndMultiplayer> {
     let lb: LaunchBoxGameMetadataResult | undefined;
     if(opts.launchbox.enabled) {
+        console.log("Looking up %s (%s) in Launchbox database", gameName, system);
         lb = await queryLaunchBoxGenreAndLocalMultiplayer(gameName, system, opts.launchbox);
     }
-
+    
     if (lb) {
+        console.log("Found %s (%s) in Launchbox database", gameName, system);
         return {
             genres: lb.genres,
             localMultiplayer: {
@@ -71,13 +79,15 @@ export async function queryGameGenreAndLocalMultiplayer(
             matchedName: lb.matchedName,
         };
     }
-
+    
     try {
+        console.log("Looking up %s (%s) in IGDB database", gameName, system);
         let igdb: IgdbGameGenreAndMultiplayerResult | undefined;
         if(opts.igdb.enabled) {
             igdb = await queryIgdbGenreAndLocalMultiplayer(gameName, system, opts.igdb);
         }
         if (igdb) {
+            console.log("Found %s (%s) in IGDB database", gameName, system);
             return {
                 genres: igdb.genres,
                 localMultiplayer: {
@@ -88,11 +98,11 @@ export async function queryGameGenreAndLocalMultiplayer(
                 matchedName: igdb.matchedName,
             };
         }
-        else {
-            return makeNoneResult();
-        }
     } catch (error) {
         console.log(`Failed to query IGDB for ${gameName} on ${system}:`, error);
         return makeNoneResult();
     }
+
+    console.log("Nothing found for %s (%s)", gameName, system);
+    return makeNoneResult();
 }

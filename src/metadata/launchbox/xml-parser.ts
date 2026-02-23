@@ -1,14 +1,13 @@
 import { createReadStream } from "fs";
-import { promises as fs } from "fs";
 import readline from "readline";
 import { titlefyString } from "../../util";
 
 import { LaunchBoxGameEntry } from "./types";
 
+let cacheBuildPromises = new Map<string, Promise<Map<string, LaunchBoxGameEntry>>>();
 let cachedIndex:
     | {
           xmlPath: string;
-          mtimeMs: number;
           byKey: Map<string, LaunchBoxGameEntry>;
       }
     | undefined;
@@ -66,10 +65,30 @@ export function makeKey(platform: string, name: string): string {
 }
 
 export async function ensureLaunchBoxIndex(xmlPath: string): Promise<Map<string, LaunchBoxGameEntry>> {
-    const stat = await fs.stat(xmlPath);
-    if (cachedIndex && cachedIndex.xmlPath === xmlPath && cachedIndex.mtimeMs === stat.mtimeMs) {
+    if (cachedIndex && cachedIndex.xmlPath === xmlPath) {
         return cachedIndex.byKey;
     }
+
+    const buildPromise = cacheBuildPromises.get(xmlPath)
+    if(buildPromise) {
+        return buildPromise;
+    }
+
+    const p = buildLaunchboxIndex(xmlPath);
+    cacheBuildPromises.set(xmlPath, p);
+
+    const byKey = await p;
+    cachedIndex = {
+        xmlPath,
+        byKey,
+    };
+
+    console.log("Launchbox index completed")
+    return byKey;
+}
+
+async function buildLaunchboxIndex(xmlPath: string) {
+    
     console.log("Bulding Launchbox index. This might take a while.")
     const byKey = new Map<string, LaunchBoxGameEntry>();
 
@@ -132,13 +151,6 @@ export async function ensureLaunchBoxIndex(xmlPath: string): Promise<Map<string,
         }
     }
 
-    cachedIndex = {
-        xmlPath,
-        mtimeMs: stat.mtimeMs,
-        byKey,
-    };
-
-    console.log("Launchbox index completed")
     return byKey;
 }
 
@@ -151,6 +163,24 @@ export async function extractGenresFromXml(xmlPath: string): Promise<string[]> {
 
     for await (const line of rl) {
         const raw = getTextTag(line, "Genres");
+        if (raw === undefined) continue;
+        for (const g of parseGenres(raw)) {
+            genres.add(g);
+        }
+    }
+
+    return [...genres].sort((a, b) => a.localeCompare(b));
+}
+
+export async function extractPlatformsFromXml(xmlPath: string): Promise<string[]> {
+    const genres = new Set<string>();
+    const rl = readline.createInterface({
+        input: createReadStream(xmlPath, { encoding: "utf8" }),
+        crlfDelay: Infinity,
+    });
+
+    for await (const line of rl) {
+        const raw = getTextTag(line, "Platform");
         if (raw === undefined) continue;
         for (const g of parseGenres(raw)) {
             genres.add(g);
