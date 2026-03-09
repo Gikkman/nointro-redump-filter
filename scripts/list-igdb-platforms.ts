@@ -9,7 +9,7 @@ async function main() {
     if (!clientId || !clientSecret) {
         console.error("Env variables IGDB_CLIENT_ID and IGDB_CLIENT_SECRET not set, loading config.yaml");
 
-        config = loadYaml("config.yaml").config.igdb;
+        config = loadYaml("config.yaml").igdb;
     }
 
     console.log(config)

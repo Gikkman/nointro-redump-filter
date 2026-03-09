@@ -1,4 +1,5 @@
-import { normalizeLocalMultiplayer } from "../src/metadata/igdb/igdb";
+import { normalizeLocalMultiplayer, pickBestByName, scoreGame } from "../src/metadata/igdb/igdb";
+import { distance } from "fastest-levenshtein";
 
 describe("igdb", () => {
     describe("normalizeLocalMultiplayer", () => {
@@ -30,6 +31,32 @@ describe("igdb", () => {
             expect(res.supportsLocalMultiplayer).toBeFalse();
             expect(res.localCoop).toBeFalse();
             expect(res.localVs).toBeFalse();
+        });
+    });
+
+    describe("name scoring helpers", () => {
+        it("scoreGame should prefer alternative name if it's closer", () => {
+            const base = { name: "Foo", alternative_names: [{ name: "Bar" }] };
+            const q = "Bar";
+            const scoreBase = scoreGame(q, base);
+            const direct = distance(q.toLowerCase(), base.name.toLowerCase());
+            const alt = distance(q.toLowerCase(), base.alternative_names![0].name!.toLowerCase());
+            expect(scoreBase).toBe(alt);
+            expect(alt).toBeLessThan(direct);
+        });
+
+        it("pickBestByName should return the game with the closest name or alt", () => {
+            const games = [
+                { name: "Game One", alternative_names: [{ name: "Uno Game" }] },
+                { name: "Other Game" },
+            ];
+            const picked = pickBestByName("Uno Game", games);
+            expect(picked).toBe(games[0]);
+        });
+
+        it("pickBestByName returns undefined for empty query or list", () => {
+            expect(pickBestByName("", [{ name: "anything" }])).toBeUndefined();
+            expect(pickBestByName("something", [])).toBeUndefined();
         });
     });
 });

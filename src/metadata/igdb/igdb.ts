@@ -48,11 +48,14 @@ type IgdbMultiplayerMode = {
     splitscreenonline?: boolean;
 };
 
+type IgdbAlternativeName = { name?: string };
+
 type IgdbGame = {
     id: number;
     name: string;
     genres?: IgdbGenre[];
     multiplayer_modes?: IgdbMultiplayerMode[];
+    alternative_names?: IgdbAlternativeName[];
 };
 
 let cachedTwitchToken:
@@ -193,14 +196,36 @@ export async function fetchAllGenresFromIgdb(config: IgdbEnabledConfig): Promise
     return [...new Set(all)].sort((a, b) => a.name.localeCompare(b.name));
 }
 
-function pickBestByName<T extends { name: string }>(query: string, list: T[]): T | undefined {
+/**
+ * Return the lowest levenshtein score for the game name or any alternative name.
+ * A smaller value is a better match.
+ */
+export function scoreGame(query: string, game: { name: string; alternative_names?: IgdbAlternativeName[] }): number {
+    const q = query.toLowerCase();
+    let best = scoreCandidate(q, game.name.toLowerCase());
+    if (game.alternative_names) {
+        for (const alt of game.alternative_names) {
+            if (alt.name) {
+                const d = scoreCandidate(q, alt.name.toLowerCase());
+                if (d < best) best = d;
+            }
+        }
+    }
+    return best;
+}
+
+export function pickBestByName<T extends { name: string; alternative_names?: IgdbAlternativeName[] }>(query: string, list: T[]): T | undefined {
     const q = query.trim();
     if (!q) return undefined;
 
     const scored = list
-        .map((x) => ({ x, score: scoreCandidate(q.toLowerCase(), x.name.toLowerCase()) }))
+        .map((x) => ({ x, score: scoreGame(q, x) }))
         .sort((a, b) => a.score - b.score);
 
+    // TODO: Refine search and check so the lowest scoring ones actually contains any of the proper words
+    // Use example: "Baseball Stars - Pocket Sports Series" "Neo Geo Pocket"
+    // This might match "Baseball Stars" or "King of Fighters R-1: Pocket Fighting Series", both with distance of 23
+    console.log(JSON.stringify(scored, null, 2))
     return scored[0]?.x;
 }
 
@@ -238,17 +263,47 @@ function mapIgdbGenreName(genre: string|undefined): string|undefined {
 }
 
 export async function queryIgdbGenreAndLocalMultiplayer(gameName: string, platform: Platform, config: IgdbEnabledConfig): Promise<IgdbGameGenreAndMultiplayerResult|undefined> {
-    if(!gameName) return undefined;
+    if (!gameName) return undefined;
 
-    const escapedName = gameName.replace(/\"/g, "\\\"");
+    const escapedName = gameName.replace(/\"/g, "\\\"").toLocaleLowerCase().replaceAll(/[^a-zA-Z0-9 ]/g, "").replaceAll(/\s{2,}/g," ")
     const wherePlatform = platform.igdbId ? ` where platforms = (${platform.igdbId});` : "";
 
-    const games = await igdbQuery<IgdbGame[]>(
+    // try the normal "search" first; the API search is decent but sometimes
+    // returns no results for queries that the website handles.
+    let games = await igdbQuery<IgdbGame[]>(
         "games",
-        `fields name, genres.name, multiplayer_modes.*; search "${escapedName}";${wherePlatform} limit 10;`,
+        `fields name, genres.name, multiplayer_modes.*, alternative_names.name; search "${escapedName}";${wherePlatform} limit 20;`,
         config
     );
-    
+
+    if(!games.length) {
+        games = await igdbQuery<IgdbGame[]>(
+            "games",
+            `fields name, genres.name, multiplayer_modes.*, alternative_names.name; where alternative_names.name = "${escapedName}";${wherePlatform} limit 20;`,
+            config
+        );
+    }
+
+    // if nothing returned, try a contains match on the name itself. this is
+    // closer to how the website behaves (it will match substrings and ignore
+    // punctuation).
+    if (!games.length) {
+        games = await igdbQuery<IgdbGame[]>(
+            "games",
+            `fields name, genres.name, multiplayer_modes.*, alternative_names.name; where name ~ "*${escapedName}*";${wherePlatform} limit 20;`,
+            config
+        );
+    }
+
+    // still nothing? look through alternative_names explicitly.
+    if (!games.length) {
+        games = await igdbQuery<IgdbGame[]>(
+            "games",
+            `fields name, genres.name, multiplayer_modes.*, alternative_names.name; where alternative_names.name ~ "*${escapedName}*";${wherePlatform} limit 20;`,
+            config
+        );
+    }
+
     if (!games.length) {
         return undefined;
     }
