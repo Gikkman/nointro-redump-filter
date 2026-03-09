@@ -1,4 +1,4 @@
-platform: 'Supergrafx'
+platform: 'SuperGrafx'
 output: 'NEC - Super Grafx [tg16]'
 input:
     - 'No-Intro/NEC - Super Grafx'

@@ -1,4 +1,4 @@
-platform: 'Sega Mega Drive'
+platform: 'Sega Genesis'
 output: 'Sega - Mega Drive - Genesis [md]'
 input:
     - 'Sega - Mega Drive - Genesis'

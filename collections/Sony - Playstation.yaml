@@ -1,4 +1,4 @@
-platform: Sony Playstation
+platform: PlayStation
 output: 'Sony - Playstation [psx]'
 input:
     - 'Sony - PlayStation (America) (Games)'

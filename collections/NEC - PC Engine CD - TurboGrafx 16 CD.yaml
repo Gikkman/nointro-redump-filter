@@ -1,4 +1,4 @@
-platform: 'TurboGrafx 16 CD'
+platform: 'TurboGrafx-CD'
 output: 'NEC - PC Engine CD & TurboGrafx CD [tgcd]'
 input:
     - 'NEC - PC Engine CD & TurboGrafx CD'

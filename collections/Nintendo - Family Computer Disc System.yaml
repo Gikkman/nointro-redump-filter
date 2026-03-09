@@ -1,4 +1,4 @@
-platform: 'Famicom Disc System'
+platform: 'Nintendo Entertainment System'
 output: 'Nintendo - Family Computer Disc System [nes]'
 input:
     - 'Nintendo - Famicom Disk System'

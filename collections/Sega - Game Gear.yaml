@@ -1,4 +1,4 @@
-platform: 'Game Gear'
+platform: 'Sega Game Gear'
 output: 'Sega - Game Gear [gg]'
 input:
     - 'Sega - Game Gear'

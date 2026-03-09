@@ -1,4 +1,4 @@
-platform: 'Lynx'
+platform: 'Atari Lynx'
 output: 'Atari - Lynx [lynx]'
 input:
     - 'No-Intro/Atari - Lynx'

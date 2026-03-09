@@ -1,4 +1,4 @@
-platform: 'Master System'
+platform: 'Sega Master System'
 output: 'Sega - Master System - Mark III [sms]'
 input:
     - 'Sega - Master System - Mark III'

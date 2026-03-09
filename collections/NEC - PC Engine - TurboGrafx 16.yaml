@@ -1,4 +1,4 @@
-platform: 'TurboGrafx 16'
+platform: 'TurboGrafx-16'
 output: 'NEC - PC Engine - TurboGrafx 16 [tg16]'
 input:
     - 'NEC - PC Engine - TurboGrafx 16'

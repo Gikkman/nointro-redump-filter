@@ -1,4 +1,4 @@
-platform: '32X'
+platform: 'Sega 32X'
 output: 'Sega - 32X [32x]'
 input:
     - 'Sega - 32X'

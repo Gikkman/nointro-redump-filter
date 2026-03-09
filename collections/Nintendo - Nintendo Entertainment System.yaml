@@ -1,4 +1,4 @@
-platform: Nes
+platform: Nintendo Entertainment System
 output: 'Nintendo - Nintendo Entertainment System [nes]'
 input:
     - 'Nintendo - Nintendo Entertainment System'

@@ -197,24 +197,24 @@ export async function fetchAllPlatformsFromIgdb(config: IgdbEnabledConfig): Prom
     return all;
 }
 
-export async function fetchAllGenresFromIgdb(config: IgdbEnabledConfig): Promise<string[]> {
+export async function fetchAllGenresFromIgdb(config: IgdbEnabledConfig): Promise<{id:number, name:string}[]> {
     const pageSize = 500;
-    const all: string[] = [];
+    const all: {id:number, name:string}[] = [];
 
     for (let offset = 0; ; offset += pageSize) {
         const page = await igdbQuery<IgdbGenreRow[]>(
             "genres",
-            `fields name; sort id asc; limit ${pageSize}; offset ${offset};`,
+            `fields name,id; sort id asc; limit ${pageSize}; offset ${offset};`,
             config
         );
         if (!page.length) break;
         for (const row of page) {
-            if (row.name) all.push(row.name);
+            if (row.name && row.id) all.push({id: row.id, name: row.name});
         }
         if (page.length < pageSize) break;
     }
 
-    return [...new Set(all)].sort((a, b) => a.localeCompare(b));
+    return [...new Set(all)].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function pickBestByName<T extends { name: string }>(query: string, list: T[]): T | undefined {
