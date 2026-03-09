@@ -1,15 +1,16 @@
 import {queryGameGenreAndLocalMultiplayer} from "../src/metadata/game-metadata"
 import { stat } from "fs/promises";
+import { PlatformEnum } from "../src/types/platform-enum";
 
 async function main() {
     const args = process.argv.slice(2);
     console.log("Args:", args);
-    if (args.length < 2) {
-        console.log("Usage: ts-node --transpile-only scripts/test-query-metadata.ts \"<gameName>\" \"<systemName>");
+    if (args.length < 3) {
+        console.log("Usage: npx tsx scripts/test-launchbox-query.ts \"<gameName>\" \"<systemName>\" \"<xmlPath>\"");
         return;
     }
     
-    const xmlPath = args[2] ?? undefined;
+    const xmlPath = args[2];
     try {
         await stat(xmlPath);
     } catch (e) {
@@ -17,7 +18,8 @@ async function main() {
         process.exit(1);
     }
 
-    const res = await queryGameGenreAndLocalMultiplayer(args[0], args[1], {
+    const platform = PlatformEnum.fromName(args[1]);
+    const res = await queryGameGenreAndLocalMultiplayer(args[0], platform, {
         launchbox: {enabled: true, xmlPath}, 
         igdb: {enabled: false}
     });

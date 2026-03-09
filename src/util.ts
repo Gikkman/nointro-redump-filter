@@ -1,6 +1,7 @@
-import { existsSync, readFileSync, writeFile, writeFileSync } from "fs";
-import { basename, join, resolve } from "path";
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { basename, join } from "path";
 import * as yaml from "yaml";
+import { PlatformEnum } from "./types/platform-enum";
 
 /** Search a string for each pattern. For the pattern that is found furthest from the
  * start of the string, create a substring from 0 to that point.
@@ -123,8 +124,9 @@ export function loadYaml(path: string) : any {
 }
 
 function isValidCollection(data: any): data is Collection {
-    const baseInfo = !!data.platform 
-        && !!data.output
+    const platform = PlatformEnum.fromName(data.platform);
+    data.platform = platform;
+    const baseInfo = !!data.output
         && !!data.input
         && data.input.length > 0;
     const unzipInfo = data.unzip !== undefined ? (data.unzip === 'sub-folder' || data.unzip === 'same-folder') : true;
@@ -144,7 +146,7 @@ export function loadClonelist(filename: string): any {
 
 export function titlefyString(s: string) {
     const numberRegex = /[0-9]/g;
-    const characterRegex = /[^a-zA-Z]/g;
+    const characterRegex = /[^a-zA-Z0-9]/g;
     return s.replace(numberRegex, numberToRoman).replace(characterRegex, "").toLowerCase();
 }
 function numberToRoman(s: string) {

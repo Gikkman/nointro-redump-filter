@@ -105,10 +105,13 @@ async function downloadLaunchBoxMetadataXml(opts: {
 
 export async function queryLaunchBoxGenreAndLocalMultiplayer(
     gameName: string,
-    system: string,
+    platform: Platform,
     opts: LaunchBoxMetadataConfig
 ): Promise<LaunchBoxGameMetadataResult | undefined> {
     if(!opts.enabled) {
+        return undefined;
+    }
+    if(!platform.launchboxId) {
         return undefined;
     }
 
@@ -120,7 +123,7 @@ export async function queryLaunchBoxGenreAndLocalMultiplayer(
     }
 
     const index = await ensureLaunchBoxIndex(xmlPath);
-    const entry = index.get(makeKey(system, gameName));
+    const entry = index.get(makeKey(platform.launchboxId, gameName));
     if (!entry) return undefined;
 
     const maxPlayers = entry.maxPlayers ?? 1;

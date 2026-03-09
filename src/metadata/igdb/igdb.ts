@@ -1,6 +1,5 @@
 import {distance} from "fastest-levenshtein";
 import { RequestLimiter } from "./request-limiter";
-import { platform } from "os";
 
 export type IgdbLocalMultiplayer = {
     supportsLocalMultiplayer: boolean;
@@ -10,7 +9,7 @@ export type IgdbLocalMultiplayer = {
 
 export type IgdbGameGenreAndMultiplayerResult = {
     gameName: string;
-    system?: string;
+    system: string;
     igdbGameId?: number;
     matchedName?: string;
     genres: string[];
@@ -35,11 +34,6 @@ type TwitchTokenResponse = {
 
 type IgdbGenre = { name?: string };
 
-type IgdbGenreRow = {
-    id: number;
-    name: string;
-};
-
 type IgdbMultiplayerMode = {
     campaigncoop?: boolean;
     dropin?: boolean;
@@ -61,24 +55,12 @@ type IgdbGame = {
     multiplayer_modes?: IgdbMultiplayerMode[];
 };
 
-type IgdbPlatform = {
-    id: number;
-    name: string;
-};
-
-type IgdbPlatformCacheFile = {
-    createdAtMs: number;
-    platforms: IgdbPlatform[];
-};
-
 let cachedTwitchToken:
     | {
           token: string;
           expiresAtMs: number;
       }
     | undefined;
-
-let platformCache: IgdbPlatform[] | undefined;
 
 let twitchTokenInFlight: Promise<string> | undefined;
 const requestLimiter = new RequestLimiter({ maxPerSecond: 4, maxPending: 4 });
@@ -173,17 +155,12 @@ function scoreCandidate(queryName: string, candidateName: string): number {
     return distance(queryName, candidateName);
 }
 
-export async function fetchAllPlatformsFromIgdb(config: IgdbEnabledConfig): Promise<IgdbPlatform[]> {
-    // TODO: Ensure there isn't several concurrent requests to this endpoint
-    if (platformCache) {
-        return platformCache;
-    }
-
+export async function fetchAllPlatformsFromIgdb(config: IgdbEnabledConfig): Promise<{id: number, name: string}[]> {
     const pageSize = 500;
-    const all: IgdbPlatform[] = [];
+    const all: {id: number, name: string}[] = [];
 
     for (let offset = 0; ; offset += pageSize) {
-        const page = await igdbQuery<IgdbPlatform[]>(
+        const page = await igdbQuery<{id: number, name: string}[]>(
             "platforms",
             `fields name; sort id asc; limit ${pageSize}; offset ${offset};`,
             config
@@ -193,7 +170,6 @@ export async function fetchAllPlatformsFromIgdb(config: IgdbEnabledConfig): Prom
         if (page.length < pageSize) break;
     }
 
-    platformCache = all;
     return all;
 }
 
@@ -202,7 +178,7 @@ export async function fetchAllGenresFromIgdb(config: IgdbEnabledConfig): Promise
     const all: {id:number, name:string}[] = [];
 
     for (let offset = 0; ; offset += pageSize) {
-        const page = await igdbQuery<IgdbGenreRow[]>(
+        const page = await igdbQuery<{id: number, name: string}[]>(
             "genres",
             `fields name,id; sort id asc; limit ${pageSize}; offset ${offset};`,
             config
@@ -248,15 +224,6 @@ export function normalizeLocalMultiplayer(modes: IgdbMultiplayerMode[] | undefin
     };
 }
 
-async function resolvePlatformId(system: string, config: IgdbEnabledConfig): Promise<number | undefined> {
-    const s = system.trim();
-    if (!s) return undefined;
-
-    const platforms = await fetchAllPlatformsFromIgdb(config);
-    const best = pickBestByName(s, platforms);
-    return best?.id;
-}
-
 function mapIgdbGenreName(genre: string|undefined): string|undefined {
     switch(genre) {
         case "Card & Board Game": return "Board Game";
@@ -270,13 +237,11 @@ function mapIgdbGenreName(genre: string|undefined): string|undefined {
     }
 }
 
-export async function queryIgdbGenreAndLocalMultiplayer(gameName: string, system: string, config: IgdbEnabledConfig): Promise<IgdbGameGenreAndMultiplayerResult|undefined> {
-    const platformId = await resolvePlatformId(system, config);
-
+export async function queryIgdbGenreAndLocalMultiplayer(gameName: string, platform: Platform, config: IgdbEnabledConfig): Promise<IgdbGameGenreAndMultiplayerResult|undefined> {
     if(!gameName) return undefined;
 
     const escapedName = gameName.replace(/\"/g, "\\\"");
-    const wherePlatform = platformId ? ` where platforms = (${platformId});` : "";
+    const wherePlatform = platform.igdbId ? ` where platforms = (${platform.igdbId});` : "";
 
     const games = await igdbQuery<IgdbGame[]>(
         "games",
@@ -297,7 +262,7 @@ export async function queryIgdbGenreAndLocalMultiplayer(gameName: string, system
     const genres = Array.from(genresSet);
     return {
         gameName,
-        system,
+        system: platform.name,
         igdbGameId: best.id,
         matchedName: best.name,
         genres,

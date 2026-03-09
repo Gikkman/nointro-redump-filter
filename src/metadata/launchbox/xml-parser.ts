@@ -60,8 +60,8 @@ function parseGenres(raw: string | undefined): string[] {
         .filter((s) => s.length > 0);
 }
 
-export function makeKey(platform: string, name: string): string {
-    return `${titlefyString(platform)}|${titlefyString(name)}`;
+export function makeKey(platformName: string, gameName: string): string {
+    return `${titlefyString(platformName)}|${titlefyString(gameName)}`;
 }
 
 export async function ensureLaunchBoxIndex(xmlPath: string): Promise<Map<string, LaunchBoxGameEntry>> {

@@ -14,10 +14,12 @@
         "rootDir": ".",
         "forceConsistentCasingInFileNames": true,
         "outDir": "build",
+
+        "skipLibCheck": true
     },
     "include": [
         "src/**/*", 
         "scripts/**/*",
         "test/*.test.ts"    
-    ],
+    ]
 }

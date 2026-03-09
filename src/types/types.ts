@@ -5,9 +5,16 @@ declare module NodeJS {
 }
 declare const DryRun: boolean;
 
+type Platform = {
+    name: string;
+    bizhawkId: string;
+    igdbId?: number;
+    launchboxId?: string;
+}
+
 /** @see {isCollection} ts-auto-guard:type-guard */
 type Collection = {
-    platform: string,
+    platform: Platform,
     output: string,
     input: string[],
     unzip?: 'sub-folder' | 'same-folder',

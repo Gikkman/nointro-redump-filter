@@ -24,7 +24,7 @@ export async function moveGames(data: MetadataResult) {
     const bestGames = buildBestGamesJson(data);
     const finalOutput: BestWriteData[] = new Array();
     let progressCounter = 0;
-    console.log(`Moving ${data.platform}. ${bestGames.length} files.`)
+    console.log(`Moving ${data.platform.name}. ${bestGames.length} files.`)
     console.log(`Processed 0/${bestGames.length} `)
     for(const game of bestGames) {
         let moveResult: MoveResult;

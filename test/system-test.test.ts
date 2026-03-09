@@ -5,6 +5,8 @@ import { BestWriteData, moveGames } from "../src/move";
 import { run, setup } from "../src/work";
 import { XMLParser } from 'fast-xml-parser'
 import { titlefyString } from "../src/util";
+import { PlatformEnum } from "../src/types/platform-enum";
+import { MetadataResult } from "../src/metadata/game-metadata";
 
 describe("Test disc-based", function() {
     const outputDir = path.join(__dirname, "system-test-created");
@@ -20,7 +22,7 @@ describe("Test disc-based", function() {
         const collection: Collection = {
             input: ["disc-based"],
             output: ".",
-            platform: "Playstation",
+            platform: PlatformEnum.Playstation,
             generateMultiDiscFile: "BizhawkXML",
             unzip: "sub-folder",
         }
@@ -39,7 +41,7 @@ describe("Test disc-based", function() {
             collectionRules,
         })
         const res = run(data)
-        await moveGames(res)
+        await moveGames(res as unknown as MetadataResult)
 
         // Do checks 
         const writeData: BestWriteData[] = JSON.parse( readFileSync( path.join(outputDir, "_best.json"), 'utf8') );
@@ -97,7 +99,7 @@ describe("Test cart-based", function() {
         const collection: Collection = {
             input: ["cart-based-1", "cart-based-2"],
             output: ".",
-            platform: "Nintendo Entertainment System",
+            platform: PlatformEnum.NES,
         }
         const collectionRules: CollectionRules = {
             englishTitleToForeignTitles: new Map([
@@ -119,7 +121,7 @@ describe("Test cart-based", function() {
             collectionRules,
         })
         const res = run(data)
-        await moveGames(res)
+        await moveGames(res as unknown as MetadataResult)
 
         // Do checks
         const writeData: BestWriteData[] = JSON.parse( readFileSync( path.join(outputDir, "_best.json"), 'utf8') );

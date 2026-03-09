@@ -38,7 +38,7 @@ export function setup(data: {
 export function run(data: ReturnType<typeof setup>) : WorkResult{
     ///////////////////////////////////////////////////////////////////////
     // Find all files
-    console.log("Scanning input directories for platform", data.platform);
+    console.log("Scanning input directories for platform", data.platform.name);
     const files: GameFile[] = listFilesFlat(".", data.skipFileExtensions, ...data.inputAbsolutePaths);
     console.log("Scanning done. Files found:", files.length);
 

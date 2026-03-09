@@ -3,9 +3,20 @@ import path, { join } from "path";
 import { mkdirIfNotExists } from "../src/files";
 import { copyGameToOutputLocation, unzipGameToOutputLocation } from "../src/move";
 
+const MOCK_METADATA: GameGenreAndMultiplayer = {
+    genres: [],
+    localMultiplayer: {
+        coop: false,
+        vs: false
+    },
+    source: "igdb",
+    matchedName: "Game"
+};
+
 describe("Test createDirIfNotExists", function() {
     const newDir = path.join(__dirname, "test-created");
     const LOGGING = false;
+
     
     // Pre conditions
     if(existsSync(newDir)) {
@@ -55,7 +66,7 @@ describe("Test move file", () => {
 
             const input = [path.join(inputDir, "game-a.zip"), path.join(inputDir, "game-b.zip")];
             const expected = [path.join(newDir, "game-a.zip"), path.join(newDir, "game-b.zip")];
-            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: "." };
+            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: ".", metadata: MOCK_METADATA };
             const result = await copyGameToOutputLocation(gwd, newDir);
             expect(result.changesMade).toBeTrue();
             expect(result.movedFilesRelativePaths).toContain("game-a.zip");
@@ -71,7 +82,7 @@ describe("Test move file", () => {
 
     it("should noop if the files existed", async () => {
         const input = [path.join(inputDir, "game-a.zip"), path.join(inputDir, "game-b.zip")];
-        const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: "." };
+        const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: ".", metadata: MOCK_METADATA };
         const result = await copyGameToOutputLocation(gwd, inputDir);
         expect(result.changesMade).toBeFalse();
         expect(result.movedFilesRelativePaths).toContain("game-a.zip");
@@ -84,7 +95,7 @@ describe("Test move file", () => {
 
             const input = [path.join(inputDir, "inner-1", "inner-1-1", "game-1-1a.rar"), path.join(inputDir, "inner-1", "inner-1-1", "game-1-1b.zip")];
             const expected = [path.join(newDir, "inner-1", "inner-1-1", "game-1-1a.rar"), path.join(newDir, "inner-1", "inner-1-1", "game-1-1b.zip")];
-            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: join("inner-1", "inner-1-1") };
+            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: join("inner-1", "inner-1-1"), metadata: MOCK_METADATA };
             const result = await copyGameToOutputLocation(gwd, newDir);
 
             expect(result.changesMade).toBeTrue();
@@ -123,7 +134,7 @@ describe("Test unzip file", () => {
 
             const input = [path.join(inputDir, "game-a.zip"), path.join(inputDir, "game-b.zip")];
             const expected = [path.join(newDir, "game-a.txt"), path.join(newDir, "game-b.txt")];
-            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: "." };
+            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: ".", metadata: MOCK_METADATA };
             const result = await unzipGameToOutputLocation(gwd, newDir);
             expect(result.changesMade).toBeTrue();
             expect(result.movedFilesRelativePaths).toContain("game-a.txt");
@@ -143,7 +154,7 @@ describe("Test unzip file", () => {
             mkdirIfNotExists(newDir, LOGGING);
 
             const input = [path.join(inputDir, "game-a.zip"), path.join(inputDir, "game-b.zip")];
-            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: "." };
+            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: ".", metadata: MOCK_METADATA };
             await unzipGameToOutputLocation(gwd, newDir)
             //2nd time should give false, since everything already existed, but we should still get the files we unzipped
             const result = await unzipGameToOutputLocation(gwd, newDir);
@@ -160,7 +171,7 @@ describe("Test unzip file", () => {
             mkdirIfNotExists(newDir, LOGGING);
 
             const input = [path.join(inputDir, "nested.zip")];
-            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: "." };
+            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: ".", metadata: MOCK_METADATA };
             const result = await unzipGameToOutputLocation(gwd, newDir);
             expect(result.changesMade).toBeTrue();
             expect(result.movedFilesRelativePaths).toContain("outer.txt");
@@ -178,7 +189,7 @@ describe("Test unzip file", () => {
 
             const input = [path.join(inputDir, "game-a.zip"), path.join(inputDir, "game-b.zip")];
             const expected = [path.join(newDir, "game-a", "game-a.txt"), path.join(newDir, "game-b", "game-b.txt")];
-            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: "." };
+            const gwd: GameWriteData = {title: "Game", languages: new Set(["en"]), readAbsolutePaths: input, writeRelativePath: ".", metadata: MOCK_METADATA };
             const result = await unzipGameToOutputLocation(gwd, newDir, true);
             expect(result.changesMade).toBeTrue();
             expect(result.movedFilesRelativePaths).toContain( path.join("game-a","game-a.txt"));

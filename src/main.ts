@@ -4,7 +4,6 @@ import { clonelistDataToCollectionRule, clonelistDirExists, loadCollection, load
 import { run, setup, SetupData } from "./work";
 import { exit } from "process";
 import { moveGames } from "./move";
-import { guessBizhawkDiscSystemKey } from "./xml-writer";
 import { MetadataResult, preHeatMetadata, queryMetadata } from "./metadata/game-metadata";
 
 main()
@@ -42,13 +41,6 @@ async function main() {
         const collectionRules = clonelistDataToCollectionRule(collection.clonelists)
         const data = setup({inputBaseDirectory, outputBaseDirectory, skipFileExtensions, skipFileTags, skipTitlePrefixes, collection, collectionRules});
         collectionData.push(data);
-
-        if(data.generateMultiDiscFile === "BizhawkXML") {
-            // Validate that the platform name can be matched towards a Bizhawk core name
-            // Kinda hacky to do it here, but I want to validate before running the long move process
-            // This method will throw an error if it can't figure out a suitable system key
-            guessBizhawkDiscSystemKey(data.platform)
-        }
     }
 
     const processed = new Array<MetadataResult>();

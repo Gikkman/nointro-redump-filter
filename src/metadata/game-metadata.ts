@@ -1,11 +1,10 @@
+import { PlatformEnum } from "../types/platform-enum";
 import { SetupData, WorkResult } from "../work";
-import { fetchAllPlatformsFromIgdb, IgdbGameGenreAndMultiplayerResult, IgdbMetadataConfig, queryIgdbGenreAndLocalMultiplayer } from "./igdb/igdb";
+import { IgdbGameGenreAndMultiplayerResult, IgdbMetadataConfig, queryIgdbGenreAndLocalMultiplayer } from "./igdb/igdb";
 import { LaunchBoxMetadataConfig, queryLaunchBoxGenreAndLocalMultiplayer } from "./launchbox/launchbox";
 import { LaunchBoxGameMetadataResult } from "./launchbox/types";
 
 export type MetadataResult = SetupData & {games: GameWithMetadata[]}
-
-// TODO: Some kind of class / enum for platforms, so we map input platform to their Launchbox and IGDB names, and their BizhawkDiscName (if it has one)
 
 function makeNoneResult(): GameGenreAndMultiplayer {
     return {
@@ -19,13 +18,14 @@ export async function preHeatMetadata(opts: {
         launchbox: LaunchBoxMetadataConfig;
         igdb: IgdbMetadataConfig;
     }) {
+    const platform = PlatformEnum.NES;
     const promises = [];
     if(opts.launchbox.enabled) {
-        const p = queryLaunchBoxGenreAndLocalMultiplayer("", "", opts.launchbox);
+        const p = queryLaunchBoxGenreAndLocalMultiplayer("Battletoads", platform, opts.launchbox);
         promises.push(p);
     }
     if(opts.igdb.enabled) {
-        const p = await fetchAllPlatformsFromIgdb(opts.igdb);
+        const p = await queryIgdbGenreAndLocalMultiplayer("Battletoads", platform, opts.igdb);
         promises.push(p);
     }
     await Promise.all(promises);
@@ -39,6 +39,10 @@ export async function queryMetadata(config: any, pastResult: WorkResult): Promis
     };
     const promises: Promise<void>[] = [];
     for(const game of pastResult.games) {
+        const igdbPlatformId = pastResult.platform.igdbId;
+        if(!igdbPlatformId)
+            continue;
+
         const p = queryGameGenreAndLocalMultiplayer(game.bestVersion.gameTitle, pastResult.platform, config)
         .then(md => {
             games.push({
@@ -55,7 +59,7 @@ export async function queryMetadata(config: any, pastResult: WorkResult): Promis
 
 export async function queryGameGenreAndLocalMultiplayer(
     gameName: string,
-    system: string,
+    platform: Platform,
     opts: {
         launchbox: LaunchBoxMetadataConfig;
         igdb: IgdbMetadataConfig;
@@ -63,12 +67,12 @@ export async function queryGameGenreAndLocalMultiplayer(
 ): Promise<GameGenreAndMultiplayer> {
     let lb: LaunchBoxGameMetadataResult | undefined;
     if(opts.launchbox.enabled) {
-        console.log("Looking up %s (%s) in Launchbox database", gameName, system);
-        lb = await queryLaunchBoxGenreAndLocalMultiplayer(gameName, system, opts.launchbox);
+        console.log("Looking up %s (%s) in Launchbox database", gameName, platform.name);
+        lb = await queryLaunchBoxGenreAndLocalMultiplayer(gameName, platform, opts.launchbox);
     }
     
     if (lb) {
-        console.log("Found %s (%s) in Launchbox database", gameName, system);
+        console.log("Found %s (%s) in Launchbox database", gameName, platform.name);
         return {
             genres: lb.genres,
             localMultiplayer: {
@@ -81,13 +85,13 @@ export async function queryGameGenreAndLocalMultiplayer(
     }
     
     try {
-        console.log("Looking up %s (%s) in IGDB database", gameName, system);
+        console.log("Looking up %s (%s) in IGDB database", gameName, platform.name);
         let igdb: IgdbGameGenreAndMultiplayerResult | undefined;
         if(opts.igdb.enabled) {
-            igdb = await queryIgdbGenreAndLocalMultiplayer(gameName, system, opts.igdb);
+            igdb = await queryIgdbGenreAndLocalMultiplayer(gameName, platform, opts.igdb);
         }
         if (igdb) {
-            console.log("Found %s (%s) in IGDB database", gameName, system);
+            console.log("Found %s (%s) in IGDB database", gameName, platform.name);
             return {
                 genres: igdb.genres,
                 localMultiplayer: {
@@ -99,10 +103,10 @@ export async function queryGameGenreAndLocalMultiplayer(
             };
         }
     } catch (error) {
-        console.log(`Failed to query IGDB for ${gameName} on ${system}:`, error);
+        console.log(`Failed to query IGDB for ${gameName} on ${platform.name}:`, error);
         return makeNoneResult();
     }
 
-    console.log("Nothing found for %s (%s)", gameName, system);
+    console.log("Nothing found for %s (%s)", gameName, platform.name);
     return makeNoneResult();
 }
